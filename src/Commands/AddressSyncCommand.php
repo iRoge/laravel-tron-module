@@ -1,11 +1,11 @@
 <?php
 
-namespace Mollsoft\LaravelTronModule\Commands;
+namespace Iroge\LaravelTronModule\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\App;
-use Mollsoft\LaravelTronModule\Models\TronAddress;
-use Mollsoft\LaravelTronModule\Services\AddressSync;
+use Iroge\LaravelTronModule\Models\TronAddress;
+use Iroge\LaravelTronModule\Services\AddressSync;
 
 class AddressSyncCommand extends Command
 {

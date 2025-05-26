@@ -1,6 +1,6 @@
 <?php
 
-namespace Mollsoft\LaravelTronModule\Api\Support;
+namespace Iroge\LaravelTronModule\Api\Support;
 
 class Base58Check
 {

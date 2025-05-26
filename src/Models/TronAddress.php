@@ -1,13 +1,13 @@
 <?php
 
-namespace Mollsoft\LaravelTronModule\Models;
+namespace Iroge\LaravelTronModule\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Mollsoft\LaravelTronModule\Casts\BigDecimalCast;
-use Mollsoft\LaravelTronModule\Casts\EncryptedCast;
+use Iroge\LaravelTronModule\Casts\BigDecimalCast;
+use Iroge\LaravelTronModule\Casts\EncryptedCast;
 
 class TronAddress extends Model
 {

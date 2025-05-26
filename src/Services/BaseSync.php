@@ -1,6 +1,6 @@
 <?php
 
-namespace Mollsoft\LaravelTronModule\Services;
+namespace Iroge\LaravelTronModule\Services;
 
 use Closure;
 

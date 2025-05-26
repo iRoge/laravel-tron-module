@@ -1,12 +1,12 @@
 <?php
 
-namespace Mollsoft\LaravelTronModule\Commands;
+namespace Iroge\LaravelTronModule\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
-use Mollsoft\LaravelTronModule\Facades\Tron;
-use Mollsoft\LaravelTronModule\Models\TronNode;
-use Mollsoft\LaravelTronModule\Models\TronWallet;
+use Iroge\LaravelTronModule\Facades\Tron;
+use Iroge\LaravelTronModule\Models\TronNode;
+use Iroge\LaravelTronModule\Models\TronWallet;
 
 class NewNodeCommand extends Command
 {

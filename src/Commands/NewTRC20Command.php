@@ -1,10 +1,10 @@
 <?php
 
-namespace Mollsoft\LaravelTronModule\Commands;
+namespace Iroge\LaravelTronModule\Commands;
 
 use Illuminate\Console\Command;
-use Mollsoft\LaravelTronModule\Facades\Tron;
-use Mollsoft\LaravelTronModule\Models\TronNode;
+use Iroge\LaravelTronModule\Facades\Tron;
+use Iroge\LaravelTronModule\Models\TronNode;
 
 class NewTRC20Command extends Command
 {

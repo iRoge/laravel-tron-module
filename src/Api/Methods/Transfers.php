@@ -1,12 +1,12 @@
 <?php
 
-namespace Mollsoft\LaravelTronModule\Api\Methods;
+namespace Iroge\LaravelTronModule\Api\Methods;
 
-use Mollsoft\LaravelTronModule\Api\ApiManager;
-use Mollsoft\LaravelTronModule\Api\DTO\TransferDTO;
-use Mollsoft\LaravelTronModule\Api\Enums\Confirmation;
-use Mollsoft\LaravelTronModule\Api\Enums\Direction;
-use Mollsoft\LaravelTronModule\Api\Enums\OrderBy;
+use Iroge\LaravelTronModule\Api\ApiManager;
+use Iroge\LaravelTronModule\Api\DTO\TransferDTO;
+use Iroge\LaravelTronModule\Api\Enums\Confirmation;
+use Iroge\LaravelTronModule\Api\Enums\Direction;
+use Iroge\LaravelTronModule\Api\Enums\OrderBy;
 
 class Transfers implements \Iterator
 {

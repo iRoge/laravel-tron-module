@@ -1,6 +1,6 @@
 <?php
 
-namespace Mollsoft\LaravelTronModule\Api\DTO;
+namespace Iroge\LaravelTronModule\Api\DTO;
 
 class TransferSendDTO
 {

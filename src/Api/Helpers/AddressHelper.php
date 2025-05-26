@@ -1,8 +1,8 @@
 <?php
 
-namespace Mollsoft\LaravelTronModule\Api\Helpers;
+namespace Iroge\LaravelTronModule\Api\Helpers;
 
-use Mollsoft\LaravelTronModule\Api\Support\Base58Check;
+use Iroge\LaravelTronModule\Api\Support\Base58Check;
 
 class AddressHelper
 {

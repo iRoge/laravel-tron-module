@@ -1,6 +1,6 @@
 <?php
 
-namespace Mollsoft\LaravelTronModule\Facades;
+namespace Iroge\LaravelTronModule\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
@@ -8,6 +8,6 @@ class Tron extends Facade
 {
     protected static function getFacadeAccessor(): string
     {
-        return \Mollsoft\LaravelTronModule\Tron::class;
+        return \Iroge\LaravelTronModule\Tron::class;
     }
 }

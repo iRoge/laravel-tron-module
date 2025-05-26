@@ -1,10 +1,10 @@
 <?php
 
-namespace Mollsoft\LaravelTronModule\Models;
+namespace Iroge\LaravelTronModule\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Mollsoft\LaravelTronModule\Api\TRC20Contract;
-use Mollsoft\LaravelTronModule\Facades\Tron;
+use Iroge\LaravelTronModule\Api\TRC20Contract;
+use Iroge\LaravelTronModule\Facades\Tron;
 
 class TronTRC20 extends Model
 {

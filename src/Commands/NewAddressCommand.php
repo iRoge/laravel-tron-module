@@ -1,10 +1,10 @@
 <?php
 
-namespace Mollsoft\LaravelTronModule\Commands;
+namespace Iroge\LaravelTronModule\Commands;
 
 use Illuminate\Console\Command;
-use Mollsoft\LaravelTronModule\Facades\Tron;
-use Mollsoft\LaravelTronModule\Models\TronWallet;
+use Iroge\LaravelTronModule\Facades\Tron;
+use Iroge\LaravelTronModule\Models\TronWallet;
 
 class NewAddressCommand extends Command
 {

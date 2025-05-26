@@ -1,11 +1,11 @@
 <?php
 
-namespace Mollsoft\LaravelTronModule\Api\DTO;
+namespace Iroge\LaravelTronModule\Api\DTO;
 
 use Brick\Math\BigDecimal;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Date;
-use Mollsoft\LaravelTronModule\Api\Helpers\AmountHelper;
+use Iroge\LaravelTronModule\Api\Helpers\AmountHelper;
 
 class TransactionInfoDTO
 {

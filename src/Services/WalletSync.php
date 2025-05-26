@@ -1,11 +1,11 @@
 <?php
 
-namespace Mollsoft\LaravelTronModule\Services;
+namespace Iroge\LaravelTronModule\Services;
 
 use Brick\Math\BigDecimal;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Date;
-use Mollsoft\LaravelTronModule\Models\TronWallet;
+use Iroge\LaravelTronModule\Models\TronWallet;
 
 class WalletSync extends BaseSync
 {

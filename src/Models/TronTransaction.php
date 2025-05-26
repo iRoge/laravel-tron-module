@@ -1,14 +1,14 @@
 <?php
 
-namespace Mollsoft\LaravelTronModule\Models;
+namespace Iroge\LaravelTronModule\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
-use Mollsoft\LaravelTronModule\Casts\BigDecimalCast;
-use Mollsoft\LaravelTronModule\Enums\TronTransactionType;
+use Iroge\LaravelTronModule\Casts\BigDecimalCast;
+use Iroge\LaravelTronModule\Enums\TronTransactionType;
 
 class TronTransaction extends Model
 {

@@ -3,9 +3,9 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Mollsoft\LaravelTronModule\Models\TronAddress;
-use Mollsoft\LaravelTronModule\Models\TronTRC20;
-use Mollsoft\LaravelTronModule\Models\TronWallet;
+use Iroge\LaravelTronModule\Models\TronAddress;
+use Iroge\LaravelTronModule\Models\TronTRC20;
+use Iroge\LaravelTronModule\Models\TronWallet;
 
 return new class extends Migration {
     public function up(): void

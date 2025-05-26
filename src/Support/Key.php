@@ -1,6 +1,6 @@
 <?php
 
-namespace Mollsoft\LaravelTronModule\Support;
+namespace Iroge\LaravelTronModule\Support;
 
 use Elliptic\EC;
 use InvalidArgumentException;

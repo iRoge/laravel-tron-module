@@ -1,9 +1,9 @@
 <?php
 
-namespace Mollsoft\LaravelTronModule\Handlers;
+namespace Iroge\LaravelTronModule\Handlers;
 
 use Illuminate\Support\Facades\Log;
-use Mollsoft\LaravelTronModule\Models\TronDeposit;
+use Iroge\LaravelTronModule\Models\TronDeposit;
 
 class EmptyWebhookHandler implements WebhookHandlerInterface
 {

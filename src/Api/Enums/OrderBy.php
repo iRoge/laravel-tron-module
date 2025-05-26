@@ -1,6 +1,6 @@
 <?php
 
-namespace Mollsoft\LaravelTronModule\Api\Enums;
+namespace Iroge\LaravelTronModule\Api\Enums;
 
 enum OrderBy: string
 {

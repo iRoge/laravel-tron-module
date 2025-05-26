@@ -1,6 +1,6 @@
 <?php
 
-namespace Mollsoft\LaravelTronModule\Enums;
+namespace Iroge\LaravelTronModule\Enums;
 
 enum TronModel: string
 {

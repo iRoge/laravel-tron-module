@@ -1,10 +1,10 @@
 <?php
 
-namespace Mollsoft\LaravelTronModule\Handlers;
+namespace Iroge\LaravelTronModule\Handlers;
 
-use Mollsoft\LaravelTronModule\Models\TronAddress;
-use Mollsoft\LaravelTronModule\Models\TronDeposit;
-use Mollsoft\LaravelTronModule\Models\TronTransaction;
+use Iroge\LaravelTronModule\Models\TronAddress;
+use Iroge\LaravelTronModule\Models\TronDeposit;
+use Iroge\LaravelTronModule\Models\TronTransaction;
 
 interface WebhookHandlerInterface
 {
