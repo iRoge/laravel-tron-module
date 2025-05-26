@@ -1,7 +1,7 @@
-![Pest Laravel Expectations](https://banners.beyondco.de/Tron.png?theme=light&packageManager=composer+require&packageName=iroge%2Flaravel-tron-module&pattern=architect&style=style_1&description=Working+with+cryptocurrency+Tron%2C+supported+TRC-20+tokens&md=1&showWatermark=1&fontSize=100px&images=https%3A%2F%2Flaravel.com%2Fimg%2Flogomark.min.svg)
+![Pest Laravel Expectations](https://banners.beyondco.de/Tron.png?theme=light&packageManager=composer+require&packageName=Iroge%2Flaravel-tron-module&pattern=architect&style=style_1&description=Working+with+cryptocurrency+Tron%2C+supported+TRC-20+tokens&md=1&showWatermark=1&fontSize=100px&images=https%3A%2F%2Flaravel.com%2Fimg%2Flogomark.min.svg)
 
-<a href="https://packagist.org/packages/mollsoft/laravel-tron-module" target="_blank">
-    <img style="display: inline-block; margin-top: 0.5em; margin-bottom: 0.5em" src="https://img.shields.io/packagist/v/mollsoft/laravel-tron-module.svg?style=flat&cacheSeconds=3600" alt="Latest Version on Packagist">
+<a href="https://packagist.org/packages/Iroge/laravel-tron-module" target="_blank">
+    <img style="display: inline-block; margin-top: 0.5em; margin-bottom: 0.5em" src="https://img.shields.io/packagist/v/Iroge/laravel-tron-module.svg?style=flat&cacheSeconds=3600" alt="Latest Version on Packagist">
 </a>
 
 <a href="https://www.php.net">
@@ -11,14 +11,6 @@
 <a href="https://laravel.com/">
     <img style="display: inline-block; margin-top: 0.5em; margin-bottom: 0.5em" src="https://img.shields.io/badge/laravel-%3E=10-red.svg?maxAge=2592000" alt="Php Version">
 </a>
-
-<a href="https://packagist.org/packages/mollsoft/laravel-tron-module" target="_blank">
-    <img style="display: inline-block; margin-top: 0.5em; margin-bottom: 0.5em" src="https://img.shields.io/packagist/dt/mollsoft/laravel-tron-module.svg?style=flat&cacheSeconds=3600" alt="Total Downloads">
-</a>
-
-<a href="https://mollsoft.com"><img alt="Website" src="https://img.shields.io/badge/Website-https://mollsoft.com-black"></a>
-<a href="https://t.me/mollsoft"><img alt="Telegram" src="https://img.shields.io/badge/Telegram-@mollsoft-blue"></a>
-
 ---
 
 **Laravel Tron Module** is a Laravel package for work with cryptocurrency Tron, with the support TRC-20 tokens.It allows you to generate HD wallets using mnemonic phrase, validate addresses, get addresses balances and resources, preview and send TRX/TRC-20 tokens. You can automate the acceptance and withdrawal of cryptocurrency in your application.
@@ -37,7 +29,7 @@ The following versions of PHP are supported by this version.
 ## Installation
 You can install the package via composer:
 ```bash
-composer require mollsoft/laravel-tron-module
+composer require Iroge/laravel-tron-module
 ```
 
 After you can run installer using command:
@@ -54,12 +46,12 @@ Register Service Provider and Facade in app, edit `config/app.php`:
 ```php
 'providers' => ServiceProvider::defaultProviders()->merge([
     ...,
-    \Mollsoft\LaravelTronModule\TronServiceProvider::class,
+    \Iroge\LaravelTronModule\TronServiceProvider::class,
 ])->toArray(),
 
 'aliases' => Facade::defaultAliases()->merge([
     ...,
-    'Tron' => \Mollsoft\LaravelTronModule\Facades\Tron::class,
+    'Tron' => \Iroge\LaravelTronModule\Facades\Tron::class,
 ])->toArray(),
 ```
 
