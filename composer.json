@@ -1,16 +1,16 @@
 {
-  "name": "mollsoft/laravel-tron-module",
+  "name": "iroge/laravel-tron-module",
   "description": "Laravel Tron Module",
-  "homepage": "https://github.com/mollsoft/laravel-tron-module",
+  "homepage": "https://github.com/iroge/laravel-tron-module",
   "license": "MIT",
   "authors": [
     {
-      "name": "MollSoft",
-      "email": "info@mollsoft.com"
+      "name": "iRoge",
+      "email": ""
     }
   ],
   "keywords": [
-    "mollsoft",
+    "iRoge",
     "laravel",
     "tron"
   ],
@@ -29,16 +29,16 @@
   },
   "autoload": {
     "psr-4": {
-      "Mollsoft\\LaravelTronModule\\": "src"
+      "iRoge\\LaravelTronModule\\": "src"
     }
   },
   "extra": {
     "laravel": {
       "providers": [
-        "Mollsoft\\LaravelTronModule\\TronServiceProvider"
+        "iRoge\\LaravelTronModule\\TronServiceProvider"
       ],
       "aliases": {
-        "Tron": "Mollsoft\\LaravelTronModule\\Facades\\Tron"
+        "Tron": "iRoge\\LaravelTronModule\\Facades\\Tron"
       }
     }
   },
