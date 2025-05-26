@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Date;
 use Iroge\LaravelTronModule\Api\Helpers\AddressHelper;
 use Iroge\LaravelTronModule\Api\Helpers\AmountHelper;
 
-class FreezeBalanceV2TransactionDTO implements ITransactionDTO
+class FreezeBalanceV2TransactionDTO extends AbstractTransactionDTO
 {
     public function __construct(
         public readonly array      $data,
@@ -21,6 +21,7 @@ class FreezeBalanceV2TransactionDTO implements ITransactionDTO
         public readonly BigDecimal $frozenBalance,
     )
     {
+        parent::__construct($data, $this->txid, $time, $success, $this->blockNumber);
     }
 
     public function toArray(): array

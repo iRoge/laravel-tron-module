@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Date;
 use Iroge\LaravelTronModule\Api\Helpers\AddressHelper;
 use Iroge\LaravelTronModule\Api\Helpers\AmountHelper;
 
-class UnFreezeBalanceV2TransactionDTO implements ITransactionDTO
+class UnFreezeBalanceV2TransactionDTO extends AbstractTransactionDTO
 {
     public function __construct(
         public readonly array      $data,
@@ -18,9 +18,10 @@ class UnFreezeBalanceV2TransactionDTO implements ITransactionDTO
         public readonly ?int       $blockNumber,
         public readonly string     $ownerAddress,
         public readonly string     $resource,
-        public readonly BigDecimal $frozenBalance,
+        public readonly BigDecimal $unfreezeBalance,
     )
     {
+        parent::__construct($data, $this->txid, $time, $success, $this->blockNumber);
     }
 
     public function toArray(): array
@@ -31,7 +32,7 @@ class UnFreezeBalanceV2TransactionDTO implements ITransactionDTO
             'success' => $this->success,
             'blockNumber' => $this->blockNumber,
             'owner_address' => $this->ownerAddress,
-            'frozen_balance' => $this->frozenBalance->__toString(),
+            'unfreeze_balance' => $this->unfreezeBalance->__toString(),
         ];
     }
 
@@ -41,7 +42,7 @@ class UnFreezeBalanceV2TransactionDTO implements ITransactionDTO
             return null;
         }
 
-        $frozenBalance = $data['raw_data']['contract'][0]['parameter']['value']['frozen_balance'];
+        $unfreezeBalance = $data['raw_data']['contract'][0]['parameter']['value']['unfreeze_balance'];
         $ownerAddress = $data['raw_data']['contract'][0]['parameter']['value']['owner_address'];
         $resource = $data['raw_data']['contract'][0]['parameter']['value']['resource'];
 
@@ -53,7 +54,7 @@ class UnFreezeBalanceV2TransactionDTO implements ITransactionDTO
             blockNumber: $data['blockNumber'] ?? null,
             ownerAddress: AddressHelper::toBase58($ownerAddress),
             resource: $resource,
-            frozenBalance: AmountHelper::sunToDecimal($frozenBalance)
+            unfreezeBalance: AmountHelper::sunToDecimal($unfreezeBalance)
         );
     }
 }

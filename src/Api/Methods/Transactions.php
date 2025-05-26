@@ -3,12 +3,12 @@
 namespace Iroge\LaravelTronModule\Api\Methods;
 
 use Iroge\LaravelTronModule\Api\ApiManager;
+use Iroge\LaravelTronModule\Api\DTO\Transaction\AbstractTransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\DelegateV2ResourcesTransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\FreezeBalanceV2TransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\TransferTransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\UnDelegateV2ResourcesTransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\UnFreezeBalanceV2TransactionDTO;
-use Iroge\LaravelTronModule\Api\DTO\TransferDTO;
 use Iroge\LaravelTronModule\Api\Enums\Confirmation;
 use Iroge\LaravelTronModule\Api\Enums\Direction;
 use Iroge\LaravelTronModule\Api\Enums\OrderBy;
@@ -102,7 +102,7 @@ class Transactions implements \Iterator
         return array_filter($query, fn($item) => $item !== null);
     }
 
-    public function current(): TransferDTO
+    public function current(): AbstractTransactionDTO
     {
         return $this->collection[$this->current];
     }

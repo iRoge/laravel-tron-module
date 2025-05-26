@@ -2,17 +2,17 @@
 
 namespace Iroge\LaravelTronModule\Services;
 
-use Closure;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Date;
-use Iroge\LaravelTronModule\Api\Api;
+use Iroge\LaravelTronModule\Api\DTO\Transaction\AbstractTransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\DelegateV2ResourcesTransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\FreezeBalanceV2TransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\ITransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\TransferTransactionDTO;
+use Iroge\LaravelTronModule\Api\DTO\Transaction\UnDelegateV2ResourcesTransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\UnFreezeBalanceV2TransactionDTO;
-use Iroge\LaravelTronModule\Api\DTO\TransferDTO;
 use Iroge\LaravelTronModule\Api\DTO\TRC20TransferDTO;
+use Iroge\LaravelTronModule\Api\Enums\Confirmation;
 use Iroge\LaravelTronModule\Casts\TransactionType;
 use Iroge\LaravelTronModule\Enums\TronTransactionType;
 use Iroge\LaravelTronModule\Facades\Tron;
@@ -164,23 +164,44 @@ class AddressSync extends BaseSync
         return $this;
     }
 
-    protected function handleTransaction(ITransactionDTO $transaction): void
+    protected function handleTransaction(AbstractTransactionDTO $transaction): void
     {
         $type = TransactionType::createByTransactionDtoClass(get_class($transaction));
+        if (!$type) {
+            return;
+        }
+
+        $to = null;
+        if ($transaction instanceof DelegateV2ResourcesTransactionDTO) {
+            $from = $transaction->ownerAddress;
+            $to = $transaction->receiverAddress;
+        } elseif ($transaction instanceof UnDelegateV2ResourcesTransactionDTO) {
+            $from = $transaction->ownerAddress;
+            $to = $transaction->receiverAddress;
+        } elseif ($transaction instanceof UnFreezeBalanceV2TransactionDTO) {
+            $from = $transaction->ownerAddress;
+        } elseif ($transaction instanceof FreezeBalanceV2TransactionDTO) {
+            $from = $transaction->ownerAddress;
+        } elseif ($transaction instanceof TransferTransactionDTO) {
+            $from = $transaction->from;
+            $to = $transaction->to;
+        } else {
+            return;
+        }
 
         TronTransaction::updateOrCreate([
             'txid' => $transaction->txid,
         ], [
             'type' => $type,
             'time_at' => $transaction->time,
-            'from' => $transaction->from,
-            'to' => $transaction->to,
+            'from' => $from,
+            'to' => $to,
             'amount' => $transaction->value,
             'block_number' => $transaction->blockNumber,
             'debug_data' => $transaction->toArray(),
         ]);
 
-        if ($transaction->to === $this->address->address && $transaction instanceof TransferTransactionDTO) {
+        if ($to === $this->address->address && $transaction instanceof TransferTransactionDTO) {
             $deposit = $this->address
                 ->deposits()
                 ->updateOrCreate([

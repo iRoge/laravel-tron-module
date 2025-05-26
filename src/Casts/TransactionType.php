@@ -4,7 +4,6 @@ namespace Iroge\LaravelTronModule\Casts;
 
 use Iroge\LaravelTronModule\Api\DTO\Transaction\DelegateV2ResourcesTransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\FreezeBalanceV2TransactionDTO;
-use Iroge\LaravelTronModule\Api\DTO\Transaction\ITransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\TransferTransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\UnDelegateV2ResourcesTransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\UnFreezeBalanceV2TransactionDTO;
@@ -35,12 +34,12 @@ class TransactionType extends BaseModelCastEnum
         UnFreezeBalanceV2TransactionDTO::class => self::UNFREEZE_V2,
     ];
 
-    public static function createByTransactionDtoClass(string $class): ?ITransactionDTO
+    public static function createByTransactionDtoClass(string $class): ?TransactionType
     {
         if (!isset(self::$dtoMap[$class])) {
             return null;
         }
 
-        return new $class(self::$dtoMap[$class]);
+        return new self(self::$dtoMap[$class]);
     }
 }
