@@ -6,8 +6,14 @@ use Closure;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Date;
 use Iroge\LaravelTronModule\Api\Api;
+use Iroge\LaravelTronModule\Api\DTO\Transaction\DelegateV2ResourcesTransactionDTO;
+use Iroge\LaravelTronModule\Api\DTO\Transaction\FreezeBalanceV2TransactionDTO;
+use Iroge\LaravelTronModule\Api\DTO\Transaction\ITransactionDTO;
+use Iroge\LaravelTronModule\Api\DTO\Transaction\TransferTransactionDTO;
+use Iroge\LaravelTronModule\Api\DTO\Transaction\UnFreezeBalanceV2TransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\TransferDTO;
 use Iroge\LaravelTronModule\Api\DTO\TRC20TransferDTO;
+use Iroge\LaravelTronModule\Casts\TransactionType;
 use Iroge\LaravelTronModule\Enums\TronTransactionType;
 use Iroge\LaravelTronModule\Facades\Tron;
 use Iroge\LaravelTronModule\Handlers\WebhookHandlerInterface;
@@ -127,8 +133,8 @@ class AddressSync extends BaseSync
         $minTimestamp = max(($this->address->sync_at?->getTimestamp() ?? 0) - 3600, 0) * 1000;
 
         $this->log('Method v1/accounts/'.$this->address->address.'/transactions started...');
-        $transfers = $this->api
-            ->getTransfers($this->address->address)
+        $transactions = $this->api
+            ->getTransactions($this->address->address)
             ->limit(200)
             ->searchInterval(false)
             ->minTimestamp($minTimestamp);
@@ -147,8 +153,8 @@ class AddressSync extends BaseSync
         ]);
         $this->node->increment('requests', 2);
 
-        foreach ($transfers as $item) {
-            $this->handleTransfer($item);
+        foreach ($transactions as $item) {
+            $this->handleTransaction($item);
         }
 
         foreach ($trc20Transfers as $item) {
@@ -158,35 +164,33 @@ class AddressSync extends BaseSync
         return $this;
     }
 
-    protected function handleTransfer(TransferDTO $transfer): void
+    protected function handleTransaction(ITransactionDTO $transaction): void
     {
-        $type = $transfer->to === $this->address->address ?
-            TronTransactionType::INCOMING : TronTransactionType::OUTGOING;
+        $type = TransactionType::createByTransactionDtoClass(get_class($transaction));
 
         TronTransaction::updateOrCreate([
-            'txid' => $transfer->txid,
-            'address' => $this->address->address,
+            'txid' => $transaction->txid,
         ], [
             'type' => $type,
-            'time_at' => $transfer->time,
-            'from' => $transfer->from,
-            'to' => $transfer->to,
-            'amount' => $transfer->value,
-            'block_number' => $transfer->blockNumber,
-            'debug_data' => $transfer->toArray(),
+            'time_at' => $transaction->time,
+            'from' => $transaction->from,
+            'to' => $transaction->to,
+            'amount' => $transaction->value,
+            'block_number' => $transaction->blockNumber,
+            'debug_data' => $transaction->toArray(),
         ]);
 
-        if ($type === TronTransactionType::INCOMING) {
+        if ($transaction->to === $this->address->address && $transaction instanceof TransferTransactionDTO) {
             $deposit = $this->address
                 ->deposits()
                 ->updateOrCreate([
-                    'txid' => $transfer->txid,
+                    'txid' => $transaction->txid,
                 ], [
                     'wallet_id' => $this->address->wallet_id,
-                    'amount' => $transfer->value,
-                    'block_height' => $transfer->blockNumber ?? 0,
-                    'confirmations' => $transfer->blockNumber && $transfer->blockNumber < $this->node->block_number ? $this->node->block_number - $transfer->blockNumber : 0,
-                    'time_at' => $transfer->time ?? Date::now(),
+                    'amount' => $transaction->value,
+                    'block_height' => $transaction->blockNumber ?? 0,
+                    'confirmations' => $transaction->blockNumber && $transaction->blockNumber < $this->node->block_number ? $this->node->block_number - $transaction->blockNumber : 0,
+                    'time_at' => $transaction->time ?? Date::now(),
                 ]);
 
             if ($deposit->wasRecentlyCreated) {
@@ -204,12 +208,10 @@ class AddressSync extends BaseSync
             return;
         }
 
-        $type = $transfer->to === $this->address->address ?
-            TronTransactionType::INCOMING : TronTransactionType::OUTGOING;
+        $type = new TransactionType(TransactionType::TRIGGER_SMART_CONTRACT);
 
         $transaction = TronTransaction::updateOrCreate([
             'txid' => $transfer->txid,
-            'address' => $this->address->address,
         ], [
             'type' => $type,
             'time_at' => $transfer->time,
@@ -220,7 +222,7 @@ class AddressSync extends BaseSync
             'debug_data' => $transfer->toArray(),
         ]);
 
-        if ($type === TronTransactionType::INCOMING) {
+        if ($transfer->to === $this->address->address) {
             $trc20 = TronTRC20::whereAddress($transfer->contractAddress)->first();
             if ($trc20) {
                 $deposit = $this->address

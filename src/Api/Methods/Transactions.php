@@ -3,12 +3,17 @@
 namespace Iroge\LaravelTronModule\Api\Methods;
 
 use Iroge\LaravelTronModule\Api\ApiManager;
+use Iroge\LaravelTronModule\Api\DTO\Transaction\DelegateV2ResourcesTransactionDTO;
+use Iroge\LaravelTronModule\Api\DTO\Transaction\FreezeBalanceV2TransactionDTO;
+use Iroge\LaravelTronModule\Api\DTO\Transaction\TransferTransactionDTO;
+use Iroge\LaravelTronModule\Api\DTO\Transaction\UnDelegateV2ResourcesTransactionDTO;
+use Iroge\LaravelTronModule\Api\DTO\Transaction\UnFreezeBalanceV2TransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\TransferDTO;
 use Iroge\LaravelTronModule\Api\Enums\Confirmation;
 use Iroge\LaravelTronModule\Api\Enums\Direction;
 use Iroge\LaravelTronModule\Api\Enums\OrderBy;
 
-class Transfers implements \Iterator
+class Transactions implements \Iterator
 {
     protected ?bool $onlyConfirmation = null;
     protected ?bool $onlyDirection = null;
@@ -150,7 +155,25 @@ class Transfers implements \Iterator
         return array_values(
             array_filter(
                 array_map(
-                    fn(array $item) => TransferDTO::fromArray($item),
+                    function (array $data) {
+                        if (!isset($data['raw_data']['contract'][0]['type'])) {
+                            return null;
+                        }
+
+                        if ($data['raw_data']['contract'][0]['type'] == 'TransferContract') {
+                            return TransferTransactionDTO::fromArray($data);
+                        } elseif ($data['raw_data']['contract'][0]['type'] == 'UnDelegateResourceContract') {
+                            return UnDelegateV2ResourcesTransactionDTO::fromArray($data);
+                        } elseif ($data['raw_data']['contract'][0]['type'] == 'DelegateResourceContract') {
+                            return DelegateV2ResourcesTransactionDTO::fromArray($data);
+                        } elseif ($data['raw_data']['contract'][0]['type'] == 'UnfreezeBalanceV2Contract') {
+                            return UnFreezeBalanceV2TransactionDTO::fromArray($data);
+                        } elseif ($data['raw_data']['contract'][0]['type'] == 'FreezeBalanceV2Contract') {
+                            return FreezeBalanceV2TransactionDTO::fromArray($data);
+                        }
+
+                        return null;
+                    },
                     $data['data']
                 )
             )

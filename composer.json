@@ -25,7 +25,8 @@
     "web3p/web3.php": "^0.1.6",
     "kornrunner/secp256k1": "^0.3",
     "simplito/elliptic-php": "^1.0",
-    "brick/math": ">=0.12"
+    "brick/math": ">=0.12",
+    "bensampo/laravel-enum": "^6.12"
   },
   "autoload": {
     "psr-4": {

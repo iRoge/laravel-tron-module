@@ -7,8 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Iroge\LaravelTronModule\Casts\BigDecimalCast;
-use Iroge\LaravelTronModule\Enums\TronTransactionType;
+use Iroge\LaravelTronModule\Casts\TransactionType;
 
 class TronTransaction extends Model
 {
@@ -16,7 +17,6 @@ class TronTransaction extends Model
 
     protected $fillable = [
         'txid',
-        'address',
         'type',
         'time_at',
         'from',
@@ -32,22 +32,31 @@ class TronTransaction extends Model
     ];
 
     protected $casts = [
-        'type' => TronTransactionType::class,
+        'type' => TransactionType::class,
         'time_at' => 'datetime',
         'amount' => BigDecimalCast::class,
         'block_number' => 'integer',
         'debug_data' => 'json',
     ];
 
-    public function addresses(): HasMany
+
+    public function fromAddress(): BelongsTo
     {
         /** @var class-string<TronAddress> $addressModel */
         $addressModel = config('tron.models.address');
 
-        return $this->hasMany($addressModel, 'address', 'address');
+        return $this->belongsTo($addressModel, 'address', 'from');
     }
 
-    public function wallets(): HasManyThrough
+    public function toAddress(): BelongsTo
+    {
+        /** @var class-string<TronAddress> $addressModel */
+        $addressModel = config('tron.models.address');
+
+        return $this->belongsTo($addressModel, 'address', 'to');
+    }
+
+    public function wallet(): HasOneThrough
     {
         /** @var class-string<TronWallet> $walletModel */
         $walletModel = config('tron.models.wallet');
@@ -55,7 +64,7 @@ class TronTransaction extends Model
         /** @var class-string<TronAddress> $addressModel */
         $addressModel = config('tron.models.address');
 
-        return $this->hasManyThrough(
+        return $this->hasOneThrough(
             $walletModel,
             $addressModel,
             'address',

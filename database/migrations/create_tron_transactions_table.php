@@ -13,12 +13,10 @@ return new class extends Migration {
             $table->id();
             $table->string('txid')
                 ->index();
-            $table->string('address')
-                ->index();
-            $table->enum('type', array_column(TronTransactionType::cases(), 'value'));
+            $table->unsignedSmallInteger('type');
             $table->timestamp('time_at');
-            $table->string('from');
-            $table->string('to');
+            $table->string('from')->index();
+            $table->string('to')->nullable()->index();
             $table->decimal('amount', 20, 6);
             $table->string('trc20_contract_address')
                 ->nullable();
@@ -26,7 +24,9 @@ return new class extends Migration {
                 ->nullable();
             $table->json('debug_data');
 
-            $table->unique(['txid', 'address']);
+            $table->unique(['txid']);
+            $table->index(['from', 'type']);
+            $table->index(['to', 'type']);
         });
     }
 

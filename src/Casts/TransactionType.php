@@ -1,0 +1,46 @@
+<?php
+
+namespace Iroge\LaravelTronModule\Casts;
+
+use Iroge\LaravelTronModule\Api\DTO\Transaction\DelegateV2ResourcesTransactionDTO;
+use Iroge\LaravelTronModule\Api\DTO\Transaction\FreezeBalanceV2TransactionDTO;
+use Iroge\LaravelTronModule\Api\DTO\Transaction\ITransactionDTO;
+use Iroge\LaravelTronModule\Api\DTO\Transaction\TransferTransactionDTO;
+use Iroge\LaravelTronModule\Api\DTO\Transaction\UnDelegateV2ResourcesTransactionDTO;
+use Iroge\LaravelTronModule\Api\DTO\Transaction\UnFreezeBalanceV2TransactionDTO;
+
+class TransactionType extends BaseModelCastEnum
+{
+    const TRANSFER = 1;
+    const DELEGATE_V2 = 2;
+    const UNDELEGATE_V2 = 3;
+    const FREEZE_V2 = 4;
+    const UNFREEZE_V2 = 5;
+    const TRIGGER_SMART_CONTRACT = 6;
+
+    protected static array $descriptions = [
+        self::TRANSFER => 'Transfer TRX',
+        self::DELEGATE_V2 => 'Delegate',
+        self::UNDELEGATE_V2 => 'Undelegate',
+        self::FREEZE_V2 => 'Freeze',
+        self::UNFREEZE_V2 => 'Unfreeze',
+        self::TRIGGER_SMART_CONTRACT => 'Trigger smart contract',
+    ];
+
+    public static array $dtoMap = [
+        TransferTransactionDTO::class => self::TRANSFER,
+        DelegateV2ResourcesTransactionDTO::class => self::DELEGATE_V2,
+        UnDelegateV2ResourcesTransactionDTO::class => self::UNDELEGATE_V2,
+        FreezeBalanceV2TransactionDTO::class => self::FREEZE_V2,
+        UnFreezeBalanceV2TransactionDTO::class => self::UNFREEZE_V2,
+    ];
+
+    public static function createByTransactionDtoClass(string $class): ?ITransactionDTO
+    {
+        if (!isset(self::$dtoMap[$class])) {
+            return null;
+        }
+
+        return new $class(self::$dtoMap[$class]);
+    }
+}

@@ -14,7 +14,7 @@ use Iroge\LaravelTronModule\Api\DTO\TransferDTO;
 use Iroge\LaravelTronModule\Api\Helpers\AddressHelper;
 use Iroge\LaravelTronModule\Api\DTO\AccountDTO;
 use Iroge\LaravelTronModule\Api\Methods\Transfer;
-use Iroge\LaravelTronModule\Api\Methods\Transfers;
+use Iroge\LaravelTronModule\Api\Methods\Transactions;
 use Iroge\LaravelTronModule\Api\Methods\TRC20Transfer;
 use Iroge\LaravelTronModule\Api\Methods\TRC20Transfers;
 
@@ -227,11 +227,11 @@ class Api
         return true;
     }
 
-    public function getTransfers(string $address): Transfers
+    public function getTransactions(string $address): Transactions
     {
         $address = AddressHelper::toBase58($address);
 
-        return new Transfers($this->manager, $address);
+        return new Transactions($this->manager, $address);
     }
 
     public function getTRC20Transfers(string $address): TRC20Transfers

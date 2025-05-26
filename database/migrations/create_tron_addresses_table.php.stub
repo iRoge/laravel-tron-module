@@ -40,6 +40,7 @@ return new class extends Migration {
                 ->default(true);
             $table->timestamps();
 
+            $table->unique(['address']);
             $table->unique(['wallet_id', 'index']);
         });
     }
