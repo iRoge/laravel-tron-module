@@ -3,6 +3,9 @@
 namespace Iroge\LaravelTronModule\Api;
 
 use Brick\Math\BigDecimal;
+use Iroge\LaravelTronModule\Api\Exceptions\BadResponseException;
+use Iroge\LaravelTronModule\Api\Helpers\AmountHelper;
+use Iroge\LaravelTronModule\Models\TronAddress;
 use kornrunner\Secp256k1;
 use kornrunner\Signature\Signature;
 use Iroge\LaravelTronModule\Api\DTO\AccountResourcesDTO;
@@ -78,6 +81,137 @@ class Api
         ]);
 
         return AccountResourcesDTO::fromArray($address, $data);
+    }
+
+    public function freezeBalanceV2(TronAddress $tronAddress, float $amount, string $resource = 'ENERGY')
+    {
+        $data = $this->manager->request('wallet/freezebalancev2', null, [
+            'owner_address'  => AddressHelper::toHex($tronAddress->address),
+            'frozen_balance' => AmountHelper::decimalToSun($amount),
+            'resource'       => $resource
+        ]);
+
+        $signedTransaction = $this->signTransaction($data, $tronAddress->private_key);
+
+        $data = $this->manager->request('wallet/broadcasttransaction', null, $signedTransaction);
+        if (!isset($data['txid'])) {
+            throw new BadResponseException($response['Error'] ?? print_r($data, true));
+        }
+
+        return $data;
+    }
+
+    public function unfreezeBalanceV2(TronAddress $tronAddress, float $amount, string $resource = 'ENERGY')
+    {
+        $data = $this->manager->request('wallet/unfreezebalancev2', null, [
+            'owner_address'  => AddressHelper::toHex($tronAddress->address),
+            'unfreeze_balance' => AmountHelper::decimalToSun($amount),
+            'resource' => $resource
+        ]);
+
+        $signedTransaction = $this->signTransaction($data, $tronAddress->private_key);
+
+        $data = $this->manager->request('wallet/broadcasttransaction', null, $signedTransaction);
+        if (!isset($data['txid'])) {
+            throw new BadResponseException($response['Error'] ?? print_r($data, true));
+        }
+
+        return $data;
+    }
+
+    public function delegateResource(TronAddress $tronAddress, string $toAddress, float $amount, string $resource = 'ENERGY')
+    {
+        $data = $this->manager->request('wallet/delegateresource', null, [
+            'owner_address'  => AddressHelper::toHex($tronAddress->address),
+            'receiver_address' => AddressHelper::toHex($toAddress),
+            'balance' => AmountHelper::decimalToSun($amount),
+            'resource' => $resource
+        ]);
+
+        $signedTransaction = $this->signTransaction($data, $tronAddress->private_key);
+
+        $data = $this->manager->request('wallet/broadcasttransaction', null, $signedTransaction);
+        if (!isset($data['txid'])) {
+            throw new BadResponseException($response['Error'] ?? print_r($data, true));
+        }
+
+        return $data;
+    }
+
+    public function undelegateResource(TronAddress $tronAddress, string $toAddress, float $amount, string $resource = 'ENERGY')
+    {
+        $data = $this->manager->request('wallet/undelegateresource', null, [
+            'owner_address'  => AddressHelper::toHex($tronAddress->address),
+            'receiver_address' => AddressHelper::toHex($toAddress),
+            'balance' => AmountHelper::decimalToSun($amount),
+            'resource' => $resource
+        ]);
+
+        $signedTransaction = $this->signTransaction($data, $tronAddress->private_key);
+
+        $data = $this->manager->request('wallet/broadcasttransaction', null, $signedTransaction);
+        if (!isset($data['txid'])) {
+            throw new BadResponseException($response['Error'] ?? print_r($data, true));
+        }
+
+        return $data;
+    }
+
+    public function getDelegatedResourceAccountIndexV2(TronAddress $tronAddress)
+    {
+        $data = $this->manager->request('wallet/getdelegatedresourceaccountindexv2', null, [
+            'value'  => AddressHelper::toHex($tronAddress->address),
+        ]);
+
+        return $data;
+    }
+
+    public function getDelegatedResourceV2(TronAddress $tronAddress, string $toAddress)
+    {
+        $data = $this->manager->request('wallet/getdelegatedresourcev2', null, [
+            'fromAddress'  => AddressHelper::toHex($tronAddress->address),
+            'toAddress'  => AddressHelper::toHex($toAddress),
+        ]);
+
+        return $data;
+    }
+
+    public function getAvailableUnfreezeCount(TronAddress $tronAddress)
+    {
+        $data = $this->manager->request('wallet/getavailableunfreezecount', null, [
+            'owner_address'  => AddressHelper::toHex($tronAddress->address),
+        ]);
+
+        return $data;
+    }
+
+    public function getCanWithdrawUnfreezeAmount(TronAddress $tronAddress, $timestampMs = null)
+    {
+        if ($timestampMs == null) {
+            $timestampMs = Carbon::now()->getTimestampMs();
+        }
+        $data = $this->manager->request('wallet/getcanwithdrawunfreezeamount', null, [
+            'owner_address'  => AddressHelper::toHex($tronAddress->address),
+            'timestamp' => $timestampMs
+        ]);
+
+        return $data;
+    }
+
+    public function withdrawExpireUnfreeze(TronAddress $tronAddress)
+    {
+        $data = $this->manager->request('wallet/withdrawexpireunfreeze', null, [
+            'owner_address'  => AddressHelper::toHex($tronAddress->address),
+        ]);
+
+        $signedTransaction = $this->signTransaction($data, $tronAddress->private_key);
+
+        $data = $this->manager->request('wallet/broadcasttransaction', null, $signedTransaction);
+        if (!isset($data['txid'])) {
+            throw new BadResponseException($response['Error'] ?? print_r($data, true));
+        }
+
+        return $data;
     }
 
     public function validateAddress(string $address, string &$error = null): bool

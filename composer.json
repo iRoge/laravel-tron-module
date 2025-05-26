@@ -6,7 +6,7 @@
   "authors": [
     {
       "name": "iRoge",
-      "email": ""
+      "email": "iroge27@gmail.com"
     }
   ],
   "keywords": [
@@ -29,16 +29,16 @@
   },
   "autoload": {
     "psr-4": {
-      "iRoge\\LaravelTronModule\\": "src"
+      "Iroge\\LaravelTronModule\\": "src"
     }
   },
   "extra": {
     "laravel": {
       "providers": [
-        "iRoge\\LaravelTronModule\\TronServiceProvider"
+        "Iroge\\LaravelTronModule\\TronServiceProvider"
       ],
       "aliases": {
-        "Tron": "iRoge\\LaravelTronModule\\Facades\\Tron"
+        "Tron": "Iroge\\LaravelTronModule\\Facades\\Tron"
       }
     }
   },
