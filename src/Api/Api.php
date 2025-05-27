@@ -176,10 +176,10 @@ class Api
         return $data;
     }
 
-    public function getAvailableUnfreezeCount(TronAddress $tronAddress)
+    public function getAvailableUnfreezeCount(string $ownerAddress)
     {
         $data = $this->manager->request('wallet/getavailableunfreezecount', null, [
-            'owner_address'  => AddressHelper::toHex($tronAddress->address),
+            'owner_address'  => AddressHelper::toHex($ownerAddress),
         ]);
 
         return $data;
