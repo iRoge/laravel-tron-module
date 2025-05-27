@@ -170,20 +170,13 @@ class AddressSync extends BaseSync
         }
 
         $to = null;
-        if ($transaction instanceof DelegateV2ResourcesTransactionDTO) {
-            $from = $transaction->ownerAddress;
-            $to = $transaction->receiverAddress;
-        } elseif ($transaction instanceof UnDelegateV2ResourcesTransactionDTO) {
-            $from = $transaction->ownerAddress;
-            $to = $transaction->receiverAddress;
-        } elseif ($transaction instanceof UnFreezeBalanceV2TransactionDTO) {
-            $from = $transaction->ownerAddress;
-        } elseif ($transaction instanceof FreezeBalanceV2TransactionDTO) {
-            $from = $transaction->ownerAddress;
-        } elseif ($transaction instanceof TransferTransactionDTO) {
-            $from = $transaction->from;
-            $to = $transaction->to;
-        } else {
+        if (
+            !$transaction instanceof DelegateV2ResourcesTransactionDTO
+            && !$transaction instanceof UnDelegateV2ResourcesTransactionDTO
+            && !$transaction instanceof UnFreezeBalanceV2TransactionDTO
+            && !$transaction instanceof FreezeBalanceV2TransactionDTO
+            && !$transaction instanceof TransferTransactionDTO
+        ) {
             return;
         }
 
@@ -192,9 +185,9 @@ class AddressSync extends BaseSync
         ], [
             'type' => $type,
             'time_at' => $transaction->time,
-            'from' => $from,
-            'to' => $to,
-            'amount' => $transaction->value,
+            'from' => $transaction->ownerAddress,
+            'to' => $transaction->receiverAddress,
+            'amount' => $transaction->amount,
             'block_number' => $transaction->blockNumber,
             'debug_data' => $transaction->toArray(),
         ]);
