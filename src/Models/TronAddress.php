@@ -68,12 +68,20 @@ class TronAddress extends Model
         );
     }
 
-    public function transactions(): HasMany
+    public function ownersTransactions(): HasMany
     {
         /** @var class-string<TronTransaction> $model */
         $model = config('tron.models.transaction');
 
-        return $this->hasMany($model, 'address', 'address');
+        return $this->hasMany($model, 'from', 'address');
+    }
+
+    public function receiversTransactions(): HasMany
+    {
+        /** @var class-string<TronTransaction> $model */
+        $model = config('tron.models.transaction');
+
+        return $this->hasMany($model, 'to', 'address');
     }
 
     public function deposits(): HasMany
@@ -82,6 +90,22 @@ class TronAddress extends Model
         $model = config('tron.models.deposit');
 
         return $this->hasMany($model, 'address_id');
+    }
+
+    public function toDelegates(): HasMany
+    {
+        /** @var class-string<TronDelegate> $model */
+        $model = config('tron.models.delegate');
+
+        return $this->hasMany($model, 'receiverAddress', 'address');
+    }
+
+    public function fromDelegates(): HasMany
+    {
+        /** @var class-string<TronDelegate> $model */
+        $model = config('tron.models.delegate');
+
+        return $this->hasMany($model, 'ownerAddress', 'address');
     }
 
     public function getPlainPasswordAttribute(): ?string

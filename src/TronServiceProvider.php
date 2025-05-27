@@ -29,6 +29,7 @@ class TronServiceProvider extends PackageServiceProvider
                 'create_tron_addresses_table',
                 'create_tron_transactions_table',
                 'create_tron_deposits_table',
+                'create_tron_delegates_table',
             ])
             ->runsMigrations()
             ->hasCommands(

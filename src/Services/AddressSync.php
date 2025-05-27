@@ -16,6 +16,7 @@ use Iroge\LaravelTronModule\Casts\TransactionType;
 use Iroge\LaravelTronModule\Facades\Tron;
 use Iroge\LaravelTronModule\Handlers\WebhookHandlerInterface;
 use Iroge\LaravelTronModule\Models\TronAddress;
+use Iroge\LaravelTronModule\Models\TronDelegate;
 use Iroge\LaravelTronModule\Models\TronDeposit;
 use Iroge\LaravelTronModule\Models\TronNode;
 use Iroge\LaravelTronModule\Models\TronTransaction;
@@ -211,6 +212,13 @@ class AddressSync extends BaseSync
 
                 $this->webhooks[] = $deposit;
             }
+        }
+
+        if (
+            $transaction instanceof DelegateV2ResourcesTransactionDTO
+            || $transaction instanceof UnDelegateV2ResourcesTransactionDTO
+        ) {
+   
         }
     }
 

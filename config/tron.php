@@ -44,5 +44,6 @@ return [
         'trc20' => \Iroge\LaravelTronModule\Models\TronTRC20::class,
         'transaction' => \Iroge\LaravelTronModule\Models\TronTransaction::class,
         'deposit' => \Iroge\LaravelTronModule\Models\TronDeposit::class,
+        'delegate' => \Iroge\LaravelTronModule\Models\TronDelegate::class,
     ]
 ];
