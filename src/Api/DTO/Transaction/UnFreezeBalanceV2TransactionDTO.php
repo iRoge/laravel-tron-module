@@ -44,7 +44,7 @@ class UnFreezeBalanceV2TransactionDTO extends AbstractTransactionDTO
 
         $unfreezeBalance = $data['raw_data']['contract'][0]['parameter']['value']['unfreeze_balance'];
         $ownerAddress = $data['raw_data']['contract'][0]['parameter']['value']['owner_address'];
-        $resource = $data['raw_data']['contract'][0]['parameter']['value']['resource'];
+        $resource = $data['raw_data']['contract'][0]['parameter']['value']['resource'] ?? 'BANDWIDTH';
 
         return new static(
             data: $data,
