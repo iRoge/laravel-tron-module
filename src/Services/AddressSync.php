@@ -236,7 +236,7 @@ class AddressSync extends BaseSync
                         );
 
                     $transactionAmount = (float)$transaction->amount->__toString();
-                    $amount = $transaction instanceof DelegateV2ResourcesTransactionDTO ? $transactionAmount : -$transactionAmount;
+                    $amount = $tronDelegate->amount + ($transaction instanceof DelegateV2ResourcesTransactionDTO ? $transactionAmount : -$transactionAmount);
                     $tronDelegate->amount = $amount;
                     $tronDelegate->save();
                 }
