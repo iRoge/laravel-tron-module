@@ -157,19 +157,19 @@ class Api
         return $data;
     }
 
-    public function getDelegatedResourceAccountIndexV2(TronAddress $tronAddress)
+    public function getDelegatedResourceAccountIndexV2(string $value)
     {
         $data = $this->manager->request('wallet/getdelegatedresourceaccountindexv2', null, [
-            'value'  => AddressHelper::toHex($tronAddress->address),
+            'value'  => AddressHelper::toHex($value),
         ]);
 
         return $data;
     }
 
-    public function getDelegatedResourceV2(TronAddress $tronAddress, string $toAddress)
+    public function getDelegatedResourceV2(string $fromAddress, string $toAddress)
     {
         $data = $this->manager->request('wallet/getdelegatedresourcev2', null, [
-            'fromAddress'  => AddressHelper::toHex($tronAddress->address),
+            'fromAddress'  => AddressHelper::toHex($fromAddress),
             'toAddress'  => AddressHelper::toHex($toAddress),
         ]);
 
