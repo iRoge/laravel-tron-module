@@ -11,18 +11,18 @@ use Iroge\LaravelTronModule\Api\Helpers\AmountHelper;
 class UnDelegateV2ResourcesTransactionDTO extends AbstractTransactionDTO
 {
     public function __construct(
-        public readonly array      $data,
-        public readonly string     $txid,
-        public readonly ?Carbon    $time,
-        public readonly bool       $success,
-        public readonly ?int       $blockNumber,
-        public readonly string     $ownerAddress,
-        public readonly string     $receiverAddress,
-        public readonly string     $resource,
-        public readonly BigDecimal $balance,
+        public array      $data,
+        public string     $txid,
+        public ?Carbon    $time,
+        public bool       $success,
+        public ?int       $blockNumber,
+        public ?string     $ownerAddress,
+        public ?string     $receiverAddress,
+        public string     $resource,
+        public BigDecimal $balance,
     )
     {
-        parent::__construct($data, $this->txid, $time, $success, $this->blockNumber);
+        parent::__construct($data, $txid, $time, $success, $blockNumber, $ownerAddress, $receiverAddress, $balance);
     }
 
     public function toArray(): array

@@ -11,17 +11,17 @@ use Iroge\LaravelTronModule\Api\Helpers\AmountHelper;
 class FreezeBalanceV2TransactionDTO extends AbstractTransactionDTO
 {
     public function __construct(
-        public readonly array      $data,
-        public readonly string     $txid,
-        public readonly ?Carbon    $time,
-        public readonly bool       $success,
-        public readonly ?int       $blockNumber,
-        public readonly string     $ownerAddress,
-        public readonly string     $resource,
-        public readonly BigDecimal $frozenBalance,
+        public array      $data,
+        public string     $txid,
+        public ?Carbon    $time,
+        public bool       $success,
+        public ?int       $blockNumber,
+        public ?string     $ownerAddress,
+        public ?string     $resource,
+        public BigDecimal $frozenBalance,
     )
     {
-        parent::__construct($data, $this->txid, $time, $success, $this->blockNumber);
+        parent::__construct($data, $txid, $time, $success, $blockNumber, $ownerAddress, amount: $frozenBalance);
     }
 
     public function toArray(): array

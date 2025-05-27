@@ -11,17 +11,17 @@ use Iroge\LaravelTronModule\Api\Helpers\AmountHelper;
 class TransferTransactionDTO extends AbstractTransactionDTO
 {
     public function __construct(
-        public readonly array      $data,
-        public readonly string     $txid,
-        public readonly ?Carbon    $time,
-        public readonly bool       $success,
-        public readonly ?int       $blockNumber,
-        public readonly string     $from,
-        public readonly string     $to,
-        public readonly BigDecimal $value,
+        public array      $data,
+        public string     $txid,
+        public ?Carbon    $time,
+        public bool       $success,
+        public ?int       $blockNumber,
+        public ?string     $ownerAddress,
+        public ?string     $receiverAddress,
+        public ?BigDecimal $amount,
     )
     {
-        parent::__construct($data, $this->txid, $time, $success, $this->blockNumber);
+        parent::__construct($data, $txid, $time, $success, $blockNumber, $ownerAddress, $receiverAddress, $amount);
     }
 
     public function toArray(): array
@@ -31,9 +31,9 @@ class TransferTransactionDTO extends AbstractTransactionDTO
             'time' => $this->time->toDateTimeString(),
             'success' => $this->success,
             'blockNumber' => $this->blockNumber,
-            'from' => $this->from,
-            'to' => $this->to,
-            'value' => $this->value->__toString(),
+            'owner_address' => $this->ownerAddress,
+            'receiver_address' => $this->receiverAddress,
+            'amount' => $this->amount->__toString(),
         ];
     }
 
@@ -50,9 +50,9 @@ class TransferTransactionDTO extends AbstractTransactionDTO
             time: isset($data['block_timestamp']) ? Date::createFromTimestampMs($data['block_timestamp']) : null,
             success: $data['ret'][0]['contractRet'] === 'SUCCESS',
             blockNumber: $data['blockNumber'] ?? null,
-            from: AddressHelper::toBase58($data['raw_data']['contract'][0]['parameter']['value']['owner_address']),
-            to: AddressHelper::toBase58($data['raw_data']['contract'][0]['parameter']['value']['to_address']),
-            value: AmountHelper::sunToDecimal($value)
+            ownerAddress: AddressHelper::toBase58($data['raw_data']['contract'][0]['parameter']['value']['owner_address']),
+            receiverAddress: AddressHelper::toBase58($data['raw_data']['contract'][0]['parameter']['value']['to_address']),
+            amount: AmountHelper::sunToDecimal($value)
         );
     }
 }
