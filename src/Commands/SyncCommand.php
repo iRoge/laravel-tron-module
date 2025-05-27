@@ -25,7 +25,7 @@ class SyncCommand extends Command
 
                 $service->run();
             } catch (\Exception $e) {
-                $this->error('---- Error: '.$e->getMessage());
+                $this->error('---- Error: '.$e->getMessage() . PHP_EOL . $e->getTraceAsString());
             }
 
             $this->line('---- Completed!');
