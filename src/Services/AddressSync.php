@@ -181,7 +181,7 @@ class AddressSync extends BaseSync
             return;
         }
 
-        TronTransaction::updateOrCreate([
+        $tronTransaction = TronTransaction::updateOrCreate([
             'txid' => $transaction->txid,
         ], [
             'type' => $type,
@@ -214,11 +214,28 @@ class AddressSync extends BaseSync
             }
         }
 
-        if (
-            $transaction instanceof DelegateV2ResourcesTransactionDTO
-            || $transaction instanceof UnDelegateV2ResourcesTransactionDTO
-        ) {
-   
+        if ($tronTransaction->wasRecentlyCreated) {
+            if (
+                $transaction instanceof DelegateV2ResourcesTransactionDTO
+                || $transaction instanceof UnDelegateV2ResourcesTransactionDTO
+            ) {
+                $tronDelegate = TronDelegate::query()
+                    ->createOrFirst(
+                        [
+                            'ownerAddress' => $transaction->ownerAddress,
+                            'recieverAddress' => $transaction->receiverAddress,
+                            'resource' => $transaction->resource,
+                        ],
+                        [
+                            'amount' => 0,
+                        ]
+                    );
+
+                $transactionAmount = (float)$transaction->amount->__toString();
+                $amount = $transaction instanceof DelegateV2ResourcesTransactionDTO ? $transactionAmount : -$transactionAmount;
+                $tronDelegate->amount = $amount;
+                $tronDelegate->save();
+        }
         }
     }
 
