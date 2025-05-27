@@ -10,7 +10,7 @@ abstract class BaseModelCastEnum extends Enum
 
     public function __construct($enumValue)
     {
-        parent::__construct((int)$enumValue);
+        parent::__construct($enumValue);
     }
 
     public static function getDescriptions(): array

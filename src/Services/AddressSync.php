@@ -4,6 +4,7 @@ namespace Iroge\LaravelTronModule\Services;
 
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\DB;
 use Iroge\LaravelTronModule\Api\Api;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\AbstractTransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\DelegateV2ResourcesTransactionDTO;
@@ -36,8 +37,9 @@ class AddressSync extends BaseSync
 
     public function __construct(
         protected readonly TronAddress $address,
-        protected readonly bool $force = false
-    ) {
+        protected readonly bool        $force = false
+    )
+    {
         $this->wallet = $this->address->wallet;
         $this->node = $this->wallet->node ?? Tron::getNode();
         $this->api = $this->node->api();
@@ -53,7 +55,7 @@ class AddressSync extends BaseSync
     {
         parent::run();
 
-        if( !$this->address->available ) {
+        if (!$this->address->available) {
             $this->log('No synchronization required, the address has not been available!', 'success');
             return;
         }
@@ -82,12 +84,12 @@ class AddressSync extends BaseSync
     {
         $this->log('Method walletsolidity/getaccount started...');
         $getAccount = $this->api->getAccount($this->address->address);
-        $this->log('Method walletsolidity/getaccount finished: '.print_r($getAccount->toArray(), true), 'success');
+        $this->log('Method walletsolidity/getaccount finished: ' . print_r($getAccount->toArray(), true), 'success');
 
         $this->log('Method wallet/getaccountresource started...');
         $getAccountResources = $this->api->getAccountResources($this->address->address);
         $this->log(
-            'Method wallet/getaccountresource finished: '.print_r($getAccountResources->toArray(), true),
+            'Method wallet/getaccountresource finished: ' . print_r($getAccountResources->toArray(), true),
             'success'
         );
 
@@ -108,10 +110,10 @@ class AddressSync extends BaseSync
         $balances = [];
 
         foreach ($this->trc20Addresses as $trc20Address) {
-            $this->log('Get TRC20 Balance from contract *'.$trc20Address.'* started...');
+            $this->log('Get TRC20 Balance from contract *' . $trc20Address . '* started...');
             $balance = Tron::getTRC20Balance($this->address, $trc20Address);
             $this->log(
-                'Get TRC20 Balance from contract *'.$trc20Address.'* finished: '.$balance->__toString(),
+                'Get TRC20 Balance from contract *' . $trc20Address . '* finished: ' . $balance->__toString(),
                 'success'
             );
 
@@ -131,25 +133,21 @@ class AddressSync extends BaseSync
     {
         $minTimestamp = max(($this->address->sync_at?->getTimestamp() ?? 0) - 3600, 0) * 1000;
 
-        $this->log('Method v1/accounts/'.$this->address->address.'/transactions started...');
+        $this->log('Method v1/accounts/' . $this->address->address . '/transactions started...');
         $transactions = $this->api
             ->getTransactions($this->address->address)
             ->limit(200)
             ->searchInterval(false)
             ->minTimestamp($minTimestamp);
-        $this->log('Method v1/accounts/'.$this->address->address.'/transactions finished', 'success');
+        $this->log('Method v1/accounts/' . $this->address->address . '/transactions finished', 'success');
 
-        $this->log('Method v1/accounts/'.$this->address->address.'/transactions/trc20 started...');
+        $this->log('Method v1/accounts/' . $this->address->address . '/transactions/trc20 started...');
         $trc20Transfers = $this->api
             ->getTRC20Transfers($this->address->address)
             ->limit(200)
             ->minTimestamp($minTimestamp);
-        $this->log('Method v1/accounts/'.$this->address->address.'/transactions/trc20 finished', 'success');
+        $this->log('Method v1/accounts/' . $this->address->address . '/transactions/trc20 finished', 'success');
 
-        $this->address->update([
-            'sync_at' => Date::now(),
-            'touch_at' => $this->address->touch_at ?: Date::now(),
-        ]);
         $this->node->increment('requests', 2);
 
         foreach ($transactions as $item) {
@@ -159,6 +157,11 @@ class AddressSync extends BaseSync
         foreach ($trc20Transfers as $item) {
             $this->handlerTRC20Transfer($item);
         }
+
+        $this->address->update([
+            'sync_at' => Date::now(),
+            'touch_at' => $this->address->touch_at ?: Date::now(),
+        ]);
 
         return $this;
     }
@@ -181,62 +184,64 @@ class AddressSync extends BaseSync
             return;
         }
 
-        $tronTransaction = TronTransaction::updateOrCreate([
-            'txid' => $transaction->txid,
-        ], [
-            'type' => $type,
-            'time_at' => $transaction->time,
-            'from' => $transaction->ownerAddress,
-            'to' => $transaction->receiverAddress,
-            'amount' => $transaction->amount,
-            'block_number' => $transaction->blockNumber,
-            'debug_data' => $transaction->toArray(),
-        ]);
+        DB::transaction(function () use ($type, $transaction, $to) {
+            $tronTransaction = TronTransaction::updateOrCreate([
+                'txid' => $transaction->txid,
+            ], [
+                'type' => $type,
+                'time_at' => $transaction->time,
+                'from' => $transaction->ownerAddress,
+                'to' => $transaction->receiverAddress,
+                'amount' => $transaction->amount,
+                'block_number' => $transaction->blockNumber,
+                'debug_data' => $transaction->toArray(),
+            ]);
 
-        if ($to === $this->address->address && $transaction instanceof TransferTransactionDTO) {
-            $deposit = $this->address
-                ->deposits()
-                ->updateOrCreate([
-                    'txid' => $transaction->txid,
-                ], [
-                    'wallet_id' => $this->address->wallet_id,
-                    'amount' => $transaction->value,
-                    'block_height' => $transaction->blockNumber ?? 0,
-                    'confirmations' => $transaction->blockNumber && $transaction->blockNumber < $this->node->block_number ? $this->node->block_number - $transaction->blockNumber : 0,
-                    'time_at' => $transaction->time ?? Date::now(),
-                ]);
+            if ($to === $this->address->address && $transaction instanceof TransferTransactionDTO) {
+                $deposit = $this->address
+                    ->deposits()
+                    ->updateOrCreate([
+                        'txid' => $transaction->txid,
+                    ], [
+                        'wallet_id' => $this->address->wallet_id,
+                        'amount' => $transaction->value,
+                        'block_height' => $transaction->blockNumber ?? 0,
+                        'confirmations' => $transaction->blockNumber && $transaction->blockNumber < $this->node->block_number ? $this->node->block_number - $transaction->blockNumber : 0,
+                        'time_at' => $transaction->time ?? Date::now(),
+                    ]);
 
-            if ($deposit->wasRecentlyCreated) {
-                $deposit->setRelation('wallet', $this->wallet);
-                $deposit->setRelation('address', $this->address);
+                if ($deposit->wasRecentlyCreated) {
+                    $deposit->setRelation('wallet', $this->wallet);
+                    $deposit->setRelation('address', $this->address);
 
-                $this->webhooks[] = $deposit;
+                    $this->webhooks[] = $deposit;
+                }
             }
-        }
 
-        if ($tronTransaction->wasRecentlyCreated) {
-            if (
-                $transaction instanceof DelegateV2ResourcesTransactionDTO
-                || $transaction instanceof UnDelegateV2ResourcesTransactionDTO
-            ) {
-                $tronDelegate = TronDelegate::query()
-                    ->createOrFirst(
-                        [
-                            'ownerAddress' => $transaction->ownerAddress,
-                            'recieverAddress' => $transaction->receiverAddress,
-                            'resource' => $transaction->resource,
-                        ],
-                        [
-                            'amount' => 0,
-                        ]
-                    );
+            if ($tronTransaction->wasRecentlyCreated) {
+                if (
+                    $transaction instanceof DelegateV2ResourcesTransactionDTO
+                    || $transaction instanceof UnDelegateV2ResourcesTransactionDTO
+                ) {
+                    $tronDelegate = TronDelegate::query()
+                        ->createOrFirst(
+                            [
+                                'owner_address' => $transaction->ownerAddress,
+                                'receiver_address' => $transaction->receiverAddress,
+                                'resource' => $transaction->resource,
+                            ],
+                            [
+                                'amount' => 0
+                            ]
+                        );
 
-                $transactionAmount = (float)$transaction->amount->__toString();
-                $amount = $transaction instanceof DelegateV2ResourcesTransactionDTO ? $transactionAmount : -$transactionAmount;
-                $tronDelegate->amount = $amount;
-                $tronDelegate->save();
-        }
-        }
+                    $transactionAmount = (float)$transaction->amount->__toString();
+                    $amount = $transaction instanceof DelegateV2ResourcesTransactionDTO ? $transactionAmount : -$transactionAmount;
+                    $tronDelegate->amount = $amount;
+                    $tronDelegate->save();
+                }
+            }
+        });
     }
 
     protected function handlerTRC20Transfer(TRC20TransferDTO $transfer): void
@@ -281,11 +286,11 @@ class AddressSync extends BaseSync
                     $this->webhooks[] = $deposit;
                 }
 
-                if( !$deposit->block_height ) {
+                if (!$deposit->block_height) {
                     try {
-                        $this->log('We request information about block number of TRC-20 transaction '.$transfer->txid.' ...');
+                        $this->log('We request information about block number of TRC-20 transaction ' . $transfer->txid . ' ...');
                         $blockNumber = $this->api->getTransferBlockNumber($transfer->txid);
-                        $this->log('Information received successfully: '.$blockNumber, 'success');
+                        $this->log('Information received successfully: ' . $blockNumber, 'success');
 
                         $deposit->update([
                             'block_height' => $blockNumber ?: null,
@@ -296,10 +301,9 @@ class AddressSync extends BaseSync
                         ]);
                         $this->node->increment('requests', 1);
                     } catch (\Exception $e) {
-                        $this->log('Error: '.$e->getMessage());
+                        $this->log('Error: ' . $e->getMessage());
                     }
-                }
-                else {
+                } else {
                     $deposit->update([
                         'confirmations' => $deposit->block_height < $this->node->block_number ? $this->node->block_number - $deposit->block_height : 0,
                     ]);
@@ -312,7 +316,7 @@ class AddressSync extends BaseSync
     {
         if ($this->webhookHandler) {
             foreach ($this->webhooks as $item) {
-                $this->log('Call Webhook Handler for Deposit #'.$item->id.': '.print_r($item->toArray(), true));
+                $this->log('Call Webhook Handler for Deposit #' . $item->id . ': ' . print_r($item->toArray(), true));
 
                 $this->webhookHandler->handle($item);
             }

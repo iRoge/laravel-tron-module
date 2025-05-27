@@ -43,7 +43,6 @@ class FreezeBalanceV2TransactionDTO extends AbstractTransactionDTO
             return null;
         }
 
-        dump($data['raw_data']);
         $frozenBalance = $data['raw_data']['contract'][0]['parameter']['value']['frozen_balance'];
         $ownerAddress = $data['raw_data']['contract'][0]['parameter']['value']['owner_address'];
         $resource = $data['raw_data']['contract'][0]['parameter']['value']['resource'] ?? 'BANDWIDTH';
