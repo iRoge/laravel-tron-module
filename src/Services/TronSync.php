@@ -15,8 +15,8 @@ class TronSync extends BaseSync
         parent::run();
 
         $this
-            ->syncNodes()
-            ->syncWallets();
+            ->syncNodes();
+//            ->syncWallets()
     }
 
     protected function syncNodes(): self
