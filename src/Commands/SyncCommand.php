@@ -21,8 +21,6 @@ class SyncCommand extends Command
             try {
                 $service = App::make(TronSync::class);
 
-                $service->setLogger(fn(string $message, ?string $type) => $this->{$type ? ($type === 'success' ? 'info' : $type) : 'line'}($message));
-
                 $service->run();
             } catch (\Exception $e) {
                 $this->error('---- Error: '.$e->getMessage() . PHP_EOL . $e->getTraceAsString());
