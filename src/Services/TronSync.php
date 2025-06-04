@@ -38,7 +38,7 @@ class TronSync extends BaseSync
 
                 $service->run();
 
-                $this->log('--- Finished sync Node ' . $node->name, 'success');
+                $this->log('--- Finished sync Node ' . $node->name);
             });
 
         return $this;
@@ -63,7 +63,7 @@ class TronSync extends BaseSync
 
                 $service->run();
 
-                $this->log('--- Finished sync Wallet ' . $wallet->name, 'success');
+                $this->log('--- Finished sync Wallet ' . $wallet->name);
             });
 
         return $this;

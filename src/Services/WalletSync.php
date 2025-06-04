@@ -41,7 +41,7 @@ class WalletSync extends BaseSync
 
             $service->run();
 
-            $this->log('- Finished sync address '.$address->address, 'success');
+            $this->log('- Finished sync address '.$address->address);
         }
 
         return $this;

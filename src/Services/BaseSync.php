@@ -2,14 +2,14 @@
 
 namespace Iroge\LaravelTronModule\Services;
 
-use Closure;
+use Psr\Log\LoggerInterface;
 
 abstract class BaseSync
 {
-    protected ?Closure $logger = null;
+    protected ?LoggerInterface $logger = null;
     protected float $startedAt;
 
-    public function setLogger(?Closure $logger): self
+    public function setLogger(?LoggerInterface $logger): self
     {
         $this->logger = $logger;
 
@@ -19,7 +19,7 @@ abstract class BaseSync
     protected function log(string $message, ?string $type = null): void
     {
         if ($this->logger) {
-            call_user_func($this->logger, '['.round((microtime(true) - $this->startedAt), 4).' s] '.$message, $type);
+            $this->logger->info($message);
         }
     }
 
