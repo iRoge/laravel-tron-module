@@ -167,7 +167,6 @@ class AddressSync extends BaseSync
             return;
         }
 
-        $to = null;
         if (
             !$transaction instanceof DelegateV2ResourcesTransactionDTO
             && !$transaction instanceof UnDelegateV2ResourcesTransactionDTO
@@ -178,7 +177,7 @@ class AddressSync extends BaseSync
             return;
         }
 
-        DB::transaction(function () use ($type, $transaction, $to) {
+        DB::transaction(function () use ($type, $transaction) {
             $tronTransaction = TronTransaction::updateOrCreate([
                 'txid' => $transaction->txid,
             ], [
@@ -191,7 +190,7 @@ class AddressSync extends BaseSync
                 'debug_data' => $transaction->toArray(),
             ]);
 
-            if ($to === $this->address->address && $transaction instanceof TransferTransactionDTO) {
+            if ($transaction->receiverAddress === $this->address->address && $transaction instanceof TransferTransactionDTO) {
                 $deposit = $this->address
                     ->deposits()
                     ->updateOrCreate([
