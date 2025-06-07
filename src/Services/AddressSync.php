@@ -197,7 +197,7 @@ class AddressSync extends BaseSync
                         'txid' => $transaction->txid,
                     ], [
                         'wallet_id' => $this->address->wallet_id,
-                        'amount' => $transaction->value,
+                        'amount' => $transaction->amount,
                         'block_height' => $transaction->blockNumber ?? 0,
                         'confirmations' => $transaction->blockNumber && $transaction->blockNumber < $this->node->block_number ? $this->node->block_number - $transaction->blockNumber : 0,
                         'time_at' => $transaction->time ?? Date::now(),
