@@ -16,7 +16,7 @@ abstract class BaseSync
         return $this;
     }
 
-    protected function log(string $message, ?string $type = null): void
+    protected function log(string $message): void
     {
         if ($this->logger) {
             $this->logger->info($message);

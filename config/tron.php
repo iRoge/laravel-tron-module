@@ -2,23 +2,6 @@
 
 return [
     /*
-     * Touch Synchronization System (TSS) config
-     * If there are many addresses in the system, we synchronize only those that have been touched recently.
-     * You must update touch_at in TronAddress, if you want sync here.
-     */
-    'touch' => [
-        /*
-         * Is system enabled?
-         */
-        'enabled' => false,
-
-        /*
-         * The time during which the address is synchronized after touching it (in seconds).
-         */
-        'waiting_seconds' => 3600,
-    ],
-
-    /*
      * Sets the handler to be used when Tron Wallet
      * receives a new deposit.
      */
