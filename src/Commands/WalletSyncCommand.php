@@ -20,25 +20,16 @@ class WalletSyncCommand extends Command
     public function handle(): void
     {
         $this->line('- Starting sync Tron Wallet #'.$this->argument('wallet_id').' ...');
+        /** @var class-string<TronWallet> $model */
+        $model = Tron::getModel(TronModel::Wallet);
+        $wallet = $model::findOrFail($this->argument('wallet_id'));
 
-        try {
-            /** @var class-string<TronWallet> $model */
-            $model = Tron::getModel(TronModel::Wallet);
-            $wallet = $model::findOrFail($this->argument('wallet_id'));
+        $this->line('- Wallet: *'.$wallet->name.'*'.$wallet->title);
 
-            $this->line('- Wallet: *'.$wallet->name.'*'.$wallet->title);
+        $service = App::make(WalletSync::class, [
+            'wallet' => $wallet
+        ]);
 
-            $service = App::make(WalletSync::class, [
-                'wallet' => $wallet
-            ]);
-
-            $service->setLogger(fn(string $message, ?string $type) => $this->{$type ? ($type === 'success' ? 'info' : $type) : 'line'}($message));
-
-            $service->run();
-        } catch (\Exception $e) {
-            $this->error('- Error: '.$e->getMessage());
-        }
-
-        $this->line('- Completed!');
+        $service->run();
     }
 }

@@ -4,6 +4,7 @@ namespace Iroge\LaravelTronModule\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Log;
 use Iroge\LaravelTronModule\Models\TronNode;
 use Iroge\LaravelTronModule\Services\NodeSync;
 
@@ -17,24 +18,16 @@ class NodeSyncCommand extends Command
     {
         $this->line('-- Starting sync Tron Node #'.$this->argument('node_id').' ...');
 
-        try {
-            /** @var class-string<TronNode> $model */
-            $model = config('tron.models.node');
-            $node = $model::findOrFail($this->argument('node_id'));
+        /** @var class-string<TronNode> $model */
+        $model = config('tron.models.node');
+        $node = $model::findOrFail($this->argument('node_id'));
 
-            $this->line('-- Node: *'.$node->name.'*'.$node->title);
+        $this->line('-- Node: *'.$node->name.'*'.$node->title);
 
-            $service = App::make(NodeSync::class, [
-                'node' => $node
-            ]);
+        $service = App::make(NodeSync::class, [
+            'node' => $node
+        ]);
 
-            $service->setLogger(fn(string $message, ?string $type) => $this->{$type ? ($type === 'success' ? 'info' : $type) : 'line'}($message));
-
-            $service->run();
-        } catch (\Exception $e) {
-            $this->error('-- Error: '.$e->getMessage());
-        }
-
-        $this->line('-- Completed!');
+        $service->run();
     }
 }
