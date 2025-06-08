@@ -18,13 +18,9 @@ class SyncCommand extends Command
         Cache::lock('tron', 300)->get(function() {
             $this->line('---- Starting sync Tron...');
 
-            try {
-                $service = App::make(TronSync::class);
+            $service = App::make(TronSync::class);
 
-                $service->run();
-            } catch (\Exception $e) {
-                $this->error('---- Error: '.$e->getMessage() . PHP_EOL . $e->getTraceAsString());
-            }
+            $service->run();
 
             $this->line('---- Completed!');
         });

@@ -33,8 +33,8 @@ class ImportAddressCommand extends Command
             $address = $this->ask('Please, enter watch-only address '.$walletName);
 
             $node = TronNode::firstOrFail();
-            if (!$node->api()->validateAddress($address, $message)) {
-                $this->error($message);
+            if (!$node->api()->validateAddress($address, $wallet->node())) {
+                $this->error('Bad watch-only address '.$address);
                 $error = true;
             }
         } while ($error);
