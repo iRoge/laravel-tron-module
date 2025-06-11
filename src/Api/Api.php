@@ -3,6 +3,7 @@
 namespace Iroge\LaravelTronModule\Api;
 
 use Brick\Math\BigDecimal;
+use Iroge\LaravelTronModule\Api\DTO\BlockDTO;
 use Iroge\LaravelTronModule\Api\Exceptions\BadResponseException;
 use Iroge\LaravelTronModule\Api\Helpers\AmountHelper;
 use Iroge\LaravelTronModule\Models\TronAddress;
@@ -270,6 +271,16 @@ class Api
         }
 
         return TransferDTO::fromArray($data, true);
+    }
+
+    public function getNowBlock(): ?BlockDTO
+    {
+        $data = $this->manager->request('walletsolidity/getnowblock');
+        if (count($data) === 0) {
+            throw new \Exception('Error while getting block: ' . print_r($data, true));
+        }
+
+        return BlockDTO::fromArray($data);
     }
 
     public function getTransferBlockNumber(string $txid): mixed
