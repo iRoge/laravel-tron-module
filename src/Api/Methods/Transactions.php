@@ -2,6 +2,7 @@
 
 namespace Iroge\LaravelTronModule\Api\Methods;
 
+use Iroge\LaravelTronModule\Api\Api;
 use Iroge\LaravelTronModule\Api\ApiManager;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\AbstractTransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\DelegateV2ResourcesTransactionDTO;
@@ -156,23 +157,7 @@ class Transactions implements \Iterator
             array_filter(
                 array_map(
                     function (array $data) {
-                        if (!isset($data['raw_data']['contract'][0]['type'])) {
-                            return null;
-                        }
-
-                        if ($data['raw_data']['contract'][0]['type'] == 'TransferContract') {
-                            return TransferTransactionDTO::fromArray($data);
-                        } elseif ($data['raw_data']['contract'][0]['type'] == 'UnDelegateResourceContract') {
-                            return UnDelegateV2ResourcesTransactionDTO::fromArray($data);
-                        } elseif ($data['raw_data']['contract'][0]['type'] == 'DelegateResourceContract') {
-                            return DelegateV2ResourcesTransactionDTO::fromArray($data);
-                        } elseif ($data['raw_data']['contract'][0]['type'] == 'UnfreezeBalanceV2Contract') {
-                            return UnFreezeBalanceV2TransactionDTO::fromArray($data);
-                        } elseif ($data['raw_data']['contract'][0]['type'] == 'FreezeBalanceV2Contract') {
-                            return FreezeBalanceV2TransactionDTO::fromArray($data);
-                        }
-
-                        return null;
+                        return Api::getDtoByTransactionArray($data);
                     },
                     $data['data']
                 )

@@ -4,6 +4,12 @@ namespace Iroge\LaravelTronModule\Api;
 
 use Brick\Math\BigDecimal;
 use Iroge\LaravelTronModule\Api\DTO\BlockDTO;
+use Iroge\LaravelTronModule\Api\DTO\Transaction\DelegateV2ResourcesTransactionDTO;
+use Iroge\LaravelTronModule\Api\DTO\Transaction\FreezeBalanceV2TransactionDTO;
+use Iroge\LaravelTronModule\Api\DTO\Transaction\ITransactionDTO;
+use Iroge\LaravelTronModule\Api\DTO\Transaction\TransferTransactionDTO;
+use Iroge\LaravelTronModule\Api\DTO\Transaction\UnDelegateV2ResourcesTransactionDTO;
+use Iroge\LaravelTronModule\Api\DTO\Transaction\UnFreezeBalanceV2TransactionDTO;
 use Iroge\LaravelTronModule\Api\Exceptions\BadResponseException;
 use Iroge\LaravelTronModule\Api\Helpers\AmountHelper;
 use Iroge\LaravelTronModule\Models\TronAddress;
@@ -24,13 +30,22 @@ class Api
     public readonly ApiManager $manager;
     protected readonly array $chainParameters;
 
+    private static array $transactionTypeDtoMap = [
+        'TransferContract' => TransferTransactionDTO::class,
+        'UnDelegateResourceContract' => UnDelegateV2ResourcesTransactionDTO::class,
+        'DelegateResourceContract' => DelegateV2ResourcesTransactionDTO::class,
+        'UnFreezeBalanceV2TransactionDTO' => UnFreezeBalanceV2TransactionDTO::class,
+        'FreezeBalanceV2Contract' => FreezeBalanceV2TransactionDTO::class,
+    ];
+
     public function __construct(
         ?HttpProvider $fullNode = null,
         ?HttpProvider $solidityNode = null,
         ?HttpProvider $eventServer = null,
         ?HttpProvider $signServer = null,
         ?HttpProvider $explorer = null,
-    ) {
+    )
+    {
         $this->manager = new ApiManager(
             compact(
                 'fullNode',
@@ -41,7 +56,7 @@ class Api
             )
         );
 
-        $chainParametersFromFile = file_get_contents(__DIR__.'/Resources/chain_parameters.json');
+        $chainParametersFromFile = file_get_contents(__DIR__ . '/Resources/chain_parameters.json');
         $chainParametersFromFile = json_decode($chainParametersFromFile, true);
         $chainParameters = [];
         foreach ($chainParametersFromFile['chainParameter'] ?? [] as $item) {
@@ -87,9 +102,9 @@ class Api
     public function freezeBalanceV2(TronAddress $tronAddress, float $amount, string $resource = 'ENERGY')
     {
         $data = $this->manager->request('wallet/freezebalancev2', null, [
-            'owner_address'  => AddressHelper::toHex($tronAddress->address),
+            'owner_address' => AddressHelper::toHex($tronAddress->address),
             'frozen_balance' => AmountHelper::decimalToSun($amount),
-            'resource'       => $resource
+            'resource' => $resource
         ]);
 
         $signedTransaction = $this->signTransaction($data, $tronAddress->private_key);
@@ -105,7 +120,7 @@ class Api
     public function unfreezeBalanceV2(TronAddress $tronAddress, float $amount, string $resource = 'ENERGY')
     {
         $data = $this->manager->request('wallet/unfreezebalancev2', null, [
-            'owner_address'  => AddressHelper::toHex($tronAddress->address),
+            'owner_address' => AddressHelper::toHex($tronAddress->address),
             'unfreeze_balance' => AmountHelper::decimalToSun($amount),
             'resource' => $resource
         ]);
@@ -123,7 +138,7 @@ class Api
     public function delegateResource(TronAddress $tronAddress, string $toAddress, float $amount, string $resource = 'ENERGY')
     {
         $data = $this->manager->request('wallet/delegateresource', null, [
-            'owner_address'  => AddressHelper::toHex($tronAddress->address),
+            'owner_address' => AddressHelper::toHex($tronAddress->address),
             'receiver_address' => AddressHelper::toHex($toAddress),
             'balance' => AmountHelper::decimalToSun($amount),
             'resource' => $resource
@@ -142,7 +157,7 @@ class Api
     public function undelegateResource(TronAddress $tronAddress, string $toAddress, float $amount, string $resource = 'ENERGY')
     {
         $data = $this->manager->request('wallet/undelegateresource', null, [
-            'owner_address'  => AddressHelper::toHex($tronAddress->address),
+            'owner_address' => AddressHelper::toHex($tronAddress->address),
             'receiver_address' => AddressHelper::toHex($toAddress),
             'balance' => AmountHelper::decimalToSun($amount),
             'resource' => $resource
@@ -161,7 +176,7 @@ class Api
     public function getDelegatedResourceAccountIndexV2(string $value)
     {
         $data = $this->manager->request('wallet/getdelegatedresourceaccountindexv2', null, [
-            'value'  => AddressHelper::toHex($value),
+            'value' => AddressHelper::toHex($value),
         ]);
 
         return $data;
@@ -170,8 +185,8 @@ class Api
     public function getDelegatedResourceV2(string $fromAddress, string $toAddress)
     {
         $data = $this->manager->request('wallet/getdelegatedresourcev2', null, [
-            'fromAddress'  => AddressHelper::toHex($fromAddress),
-            'toAddress'  => AddressHelper::toHex($toAddress),
+            'fromAddress' => AddressHelper::toHex($fromAddress),
+            'toAddress' => AddressHelper::toHex($toAddress),
         ]);
 
         return $data;
@@ -180,7 +195,7 @@ class Api
     public function getAvailableUnfreezeCount(string $ownerAddress)
     {
         $data = $this->manager->request('wallet/getavailableunfreezecount', null, [
-            'owner_address'  => AddressHelper::toHex($ownerAddress),
+            'owner_address' => AddressHelper::toHex($ownerAddress),
         ]);
 
         return $data;
@@ -192,7 +207,7 @@ class Api
             $timestampMs = Carbon::now()->getTimestampMs();
         }
         $data = $this->manager->request('wallet/getcanwithdrawunfreezeamount', null, [
-            'owner_address'  => AddressHelper::toHex($tronAddress->address),
+            'owner_address' => AddressHelper::toHex($tronAddress->address),
             'timestamp' => $timestampMs
         ]);
 
@@ -202,7 +217,7 @@ class Api
     public function withdrawExpireUnfreeze(TronAddress $tronAddress)
     {
         $data = $this->manager->request('wallet/withdrawexpireunfreeze', null, [
-            'owner_address'  => AddressHelper::toHex($tronAddress->address),
+            'owner_address' => AddressHelper::toHex($tronAddress->address),
         ]);
 
         $signedTransaction = $this->signTransaction($data, $tronAddress->private_key);
@@ -255,7 +270,7 @@ class Api
             'value' => $txid
         ]);
         if (count($data) === 0) {
-            throw new \Exception('Transaction '.$txid.' not found');
+            throw new \Exception('Transaction ' . $txid . ' not found');
         }
 
         return TransactionInfoDTO::fromArray($data);
@@ -267,7 +282,7 @@ class Api
             'value' => $txid,
         ]);
         if (count($data) === 0) {
-            throw new \Exception('Transaction '.$txid.' not found');
+            throw new \Exception('Transaction ' . $txid . ' not found');
         }
 
         return TransferDTO::fromArray($data, true);
@@ -307,12 +322,13 @@ class Api
     }
 
     public function transferTRC20(
-        string $contractAddress,
-        string $from,
-        string $to,
+        string                      $contractAddress,
+        string                      $from,
+        string                      $to,
         string|int|float|BigDecimal $amount,
         string|int|float|BigDecimal $feeLimit = 30
-    ): TRC20Transfer {
+    ): TRC20Transfer
+    {
         $contract = $this->getTRC20Contract($contractAddress);
         $from = AddressHelper::toBase58($from);
         $to = AddressHelper::toBase58($to);
@@ -335,8 +351,23 @@ class Api
 
         /** @var Signature $sign */
         $sign = $secp->sign($transaction['txID'], $privateKey, ['canonical' => false]);
-        $transaction['signature'] = $sign->toHex().bin2hex(implode('', array_map('chr', [$sign->getRecoveryParam()])));
+        $transaction['signature'] = $sign->toHex() . bin2hex(implode('', array_map('chr', [$sign->getRecoveryParam()])));
 
         return $transaction;
+    }
+
+    public static function getDtoByTransactionArray($array): ?ITransactionDTO
+    {
+        if (!isset($data['raw_data']['contract'][0]['type'])) {
+            return null;
+        }
+
+        $type = $data['raw_data']['contract'][0]['type'];
+
+        if (!isset(self::$transactionTypeDtoMap[$type])) {
+            return null;
+        }
+
+        return self::$transactionTypeDtoMap[$type]::fromArray($array);
     }
 }
