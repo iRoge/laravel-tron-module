@@ -36,10 +36,10 @@ class UnFreezeBalanceV2TransactionDTO extends AbstractTransactionDTO
         ];
     }
 
-    public static function fromArray(array $data): ?static
+    public static function fromArray(array $data): static
     {
         if (($data['raw_data']['contract'][0]['type'] ?? null) !== 'UnfreezeBalanceV2Contract') {
-            return null;
+            throw new \Exception('Bad UnfreezeBalanceV2Contract transaction array: ' . print_r($data, true));
         }
 
         $unfreezeBalance = $data['raw_data']['contract'][0]['parameter']['value']['unfreeze_balance'];

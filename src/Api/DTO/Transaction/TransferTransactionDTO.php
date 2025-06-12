@@ -37,10 +37,10 @@ class TransferTransactionDTO extends AbstractTransactionDTO
         ];
     }
 
-    public static function fromArray(array $data): ?static
+    public static function fromArray(array $data): static
     {
         if (($data['raw_data']['contract'][0]['type'] ?? null) !== 'TransferContract') {
-            return null;
+            throw new \Exception('Bad TransferContract transaction array: ' . print_r($data, true));
         }
         $value = $data['raw_data']['contract'][0]['parameter']['value']['amount'];
 

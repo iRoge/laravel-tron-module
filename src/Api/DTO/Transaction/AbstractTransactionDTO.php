@@ -6,10 +6,10 @@ namespace Iroge\LaravelTronModule\Api\DTO\Transaction;
 use Brick\Math\BigDecimal;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Date;
+use Iroge\LaravelTronModule\Api\DTO\IDTO;
 use Iroge\LaravelTronModule\Api\Helpers\AddressHelper;
-use Iroge\LaravelTronModule\Api\Helpers\AmountHelper;
 
-abstract class AbstractTransactionDTO implements ITransactionDTO
+abstract class AbstractTransactionDTO implements IDTO
 {
     public function __construct(
         public array      $data,
@@ -36,14 +36,14 @@ abstract class AbstractTransactionDTO implements ITransactionDTO
         ];
     }
 
-    public static function fromArray(array $data): ?static
+    public static function fromArray(array $data): static
     {
         if (
             !isset($data['raw_data']['contract'][0]['parameter']['value']['owner_address'])
             || !isset($data['txID'])
             || !isset($data['ret'][0]['contractRet'])
         ) {
-            return null;
+            throw new \Exception('Bad transaction array: ' . print_r($data, true));
         }
 
         return new static(

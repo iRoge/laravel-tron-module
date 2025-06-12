@@ -39,10 +39,10 @@ class UnDelegateV2ResourcesTransactionDTO extends AbstractTransactionDTO
         ];
     }
 
-    public static function fromArray(array $data): ?static
+    public static function fromArray(array $data): static
     {
         if (($data['raw_data']['contract'][0]['type'] ?? null) !== 'UnDelegateResourceContract') {
-            return null;
+            throw new \Exception('Bad UnDelegateResourceContract transaction array: ' . print_r($data, true));
         }
         $balance = $data['raw_data']['contract'][0]['parameter']['value']['balance'];
         $receiverAddress = $data['raw_data']['contract'][0]['parameter']['value']['receiver_address'];

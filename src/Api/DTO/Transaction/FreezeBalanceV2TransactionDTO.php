@@ -37,10 +37,10 @@ class FreezeBalanceV2TransactionDTO extends AbstractTransactionDTO
         ];
     }
 
-    public static function fromArray(array $data): ?static
+    public static function fromArray(array $data): static
     {
         if (($data['raw_data']['contract'][0]['type'] ?? null) !== 'FreezeBalanceV2Contract') {
-            return null;
+            throw new \Exception('Bad FreezeBalanceV2Contract transaction array: ' . print_r($data, true));
         }
 
         $frozenBalance = $data['raw_data']['contract'][0]['parameter']['value']['frozen_balance'];

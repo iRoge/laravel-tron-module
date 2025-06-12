@@ -3,28 +3,31 @@
 namespace Iroge\LaravelTronModule\Api;
 
 use Brick\Math\BigDecimal;
+use Iroge\LaravelTronModule\Api\DTO\AccountDTO;
+use Iroge\LaravelTronModule\Api\DTO\AccountResourcesDTO;
 use Iroge\LaravelTronModule\Api\DTO\BlockDTO;
+use Iroge\LaravelTronModule\Api\DTO\Event\AbstractEventDTO;
+use Iroge\LaravelTronModule\Api\DTO\Event\TransferTrc20EventDTO;
+use Iroge\LaravelTronModule\Api\DTO\Event\UnknownEventDTO;
+use Iroge\LaravelTronModule\Api\DTO\IDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\DelegateV2ResourcesTransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\FreezeBalanceV2TransactionDTO;
-use Iroge\LaravelTronModule\Api\DTO\Transaction\ITransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\TransferTransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\UnDelegateV2ResourcesTransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\UnFreezeBalanceV2TransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\UnknownTransactionDto;
+use Iroge\LaravelTronModule\Api\DTO\TransactionInfoDTO;
+use Iroge\LaravelTronModule\Api\DTO\TransferDTO;
 use Iroge\LaravelTronModule\Api\Exceptions\BadResponseException;
+use Iroge\LaravelTronModule\Api\Helpers\AddressHelper;
 use Iroge\LaravelTronModule\Api\Helpers\AmountHelper;
+use Iroge\LaravelTronModule\Api\Methods\Transactions;
+use Iroge\LaravelTronModule\Api\Methods\Transfer;
+use Iroge\LaravelTronModule\Api\Methods\TRC20Transfer;
+use Iroge\LaravelTronModule\Api\Methods\TRC20Transfers;
 use Iroge\LaravelTronModule\Models\TronAddress;
 use kornrunner\Secp256k1;
 use kornrunner\Signature\Signature;
-use Iroge\LaravelTronModule\Api\DTO\AccountResourcesDTO;
-use Iroge\LaravelTronModule\Api\DTO\TransactionInfoDTO;
-use Iroge\LaravelTronModule\Api\DTO\TransferDTO;
-use Iroge\LaravelTronModule\Api\Helpers\AddressHelper;
-use Iroge\LaravelTronModule\Api\DTO\AccountDTO;
-use Iroge\LaravelTronModule\Api\Methods\Transfer;
-use Iroge\LaravelTronModule\Api\Methods\Transactions;
-use Iroge\LaravelTronModule\Api\Methods\TRC20Transfer;
-use Iroge\LaravelTronModule\Api\Methods\TRC20Transfers;
 
 class Api
 {
@@ -37,6 +40,10 @@ class Api
         'DelegateResourceContract' => DelegateV2ResourcesTransactionDTO::class,
         'UnFreezeBalanceV2TransactionDTO' => UnFreezeBalanceV2TransactionDTO::class,
         'FreezeBalanceV2Contract' => FreezeBalanceV2TransactionDTO::class,
+    ];
+
+    private static array $eventTypeDtoMap = [
+        'Transfer' => TransferTrc20EventDTO::class,
     ];
 
     public function __construct(
@@ -299,6 +306,53 @@ class Api
         return BlockDTO::fromArray($data);
     }
 
+    public function getBlockByNumber(int $number): ?BlockDTO
+    {
+        $data = $this->manager->request('walletsolidity/getblockbynum', null, [
+            'num' => $number,
+        ]);
+        if (count($data) === 0) {
+            throw new \Exception('Error while getting block: ' . print_r($data, true));
+        }
+
+        return BlockDTO::fromArray($data);
+    }
+
+    /** @return array<AbstractEventDTO> */
+    public function getEventsByBlockNumber(int $blockNumber): array
+    {
+        $limit = 200;
+        $path = '/v1/blocks/' . $blockNumber . '/events';
+        $responseArray = $this->manager->request($path, null, [
+            'limit' => $limit
+        ]);
+        if (count($responseArray) === 0) {
+            throw new \Exception('Error while getting events by block: ' . print_r($responseArray, true));
+        }
+
+        $events = $responseArray['data'];
+        while (count($events) % $limit === 0) {
+            $responseArray = $this->manager->request($path, null, [
+                'limit' => $limit,
+                'fingerprint' => $responseArray['meta']['fingerprint']
+            ]);
+            if (count($responseArray) === 0) {
+                throw new \Exception('Error while getting events by block: ' . print_r($responseArray, true));
+            }
+            if (!count($responseArray['data'])) {
+                break;
+            }
+            $events = array_merge($events, $responseArray['data']);
+        }
+
+        $array = [];
+        foreach ($events as $event) {
+            $array[] = self::getDtoByEventArray($event);
+        }
+
+        return $array;
+    }
+
     public function getTransferBlockNumber(string $txid): mixed
     {
         $data = $this->manager->request('wallet/gettransactioninfobyid', [
@@ -357,7 +411,7 @@ class Api
         return $transaction;
     }
 
-    public static function getDtoByTransactionArray($array): ?ITransactionDTO
+    public static function getDtoByTransactionArray($array): ?IDTO
     {
         if (!isset($array['raw_data']['contract'][0]['type'])) {
             return null;
@@ -370,5 +424,20 @@ class Api
         }
 
         return self::$transactionTypeDtoMap[$type]::fromArray($array);
+    }
+
+    public static function getDtoByEventArray($array): ?IDTO
+    {
+        if (!isset($array['event_name'])) {
+            return null;
+        }
+
+        $name = $array['event_name'];
+
+        if (!isset(self::$eventTypeDtoMap[$name])) {
+            return UnknownEventDTO::fromArray($array);
+        }
+
+        return self::$eventTypeDtoMap[$name]::fromArray($array);
     }
 }
