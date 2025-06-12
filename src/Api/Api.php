@@ -7,7 +7,7 @@ use Iroge\LaravelTronModule\Api\DTO\AccountDTO;
 use Iroge\LaravelTronModule\Api\DTO\AccountResourcesDTO;
 use Iroge\LaravelTronModule\Api\DTO\BlockDTO;
 use Iroge\LaravelTronModule\Api\DTO\Event\AbstractEventDTO;
-use Iroge\LaravelTronModule\Api\DTO\Event\TransferTrc20EventDTO;
+use Iroge\LaravelTronModule\Api\DTO\Event\TransferEventDTO;
 use Iroge\LaravelTronModule\Api\DTO\Event\UnknownEventDTO;
 use Iroge\LaravelTronModule\Api\DTO\IDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\DelegateV2ResourcesTransactionDTO;
@@ -43,7 +43,7 @@ class Api
     ];
 
     private static array $eventTypeDtoMap = [
-        'Transfer' => TransferTrc20EventDTO::class,
+        'Transfer' => TransferEventDTO::class,
     ];
 
     public function __construct(
