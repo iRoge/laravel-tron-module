@@ -47,7 +47,7 @@ class TransferTransactionDTO extends AbstractTransactionDTO
         if (isset($data['block_timestamp'])) {
             $date = Date::createFromTimestampMs($data['block_timestamp']);
         } else {
-            $date = Date::createFromTimestampMs($data['timestamp']);
+            $date = Date::createFromTimestampMs($data['raw_data']['timestamp']);
         }
 
         return new static(
