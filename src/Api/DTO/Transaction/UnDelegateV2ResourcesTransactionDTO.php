@@ -47,7 +47,7 @@ class UnDelegateV2ResourcesTransactionDTO extends AbstractTransactionDTO
         $balance = $data['raw_data']['contract'][0]['parameter']['value']['balance'];
         $receiverAddress = $data['raw_data']['contract'][0]['parameter']['value']['receiver_address'];
         $ownerAddress = $data['raw_data']['contract'][0]['parameter']['value']['owner_address'];
-        $resource = $data['raw_data']['contract'][0]['parameter']['value']['resource'];
+        $resource = $data['raw_data']['contract'][0]['parameter']['value']['resource'] ?? 'BANDWIDTH';
 
         return new static(
             data: $data,
