@@ -296,7 +296,7 @@ class Api
         return TransferDTO::fromArray($data, true);
     }
 
-    public function getNowBlock(): ?BlockDTO
+    public function getNowBlock(): BlockDTO
     {
         $data = $this->manager->request('walletsolidity/getnowblock');
         if (count($data) === 0) {
@@ -312,32 +312,32 @@ class Api
             'num' => $number,
         ]);
         if (count($data) === 0) {
-            throw new \Exception('Error while getting block: ' . print_r($data, true));
+            return null;
         }
 
         return BlockDTO::fromArray($data);
     }
 
     /** @return array<AbstractEventDTO> */
-    public function getEventsByBlockNumber(int $blockNumber): array
+    public function getEventsByBlockNumber(int $blockNumber): ?array
     {
         $limit = 200;
         $path = '/v1/blocks/' . $blockNumber . '/events';
-        $responseArray = $this->manager->request($path, null, [
+        $responseArray = $this->manager->request($path, [
             'limit' => $limit
         ]);
         if (count($responseArray) === 0) {
-            throw new \Exception('Error while getting events by block: ' . print_r($responseArray, true));
+            return null;
         }
 
         $events = $responseArray['data'];
         while (count($events) % $limit === 0) {
-            $responseArray = $this->manager->request($path, null, [
+            $responseArray = $this->manager->request($path, [
                 'limit' => $limit,
                 'fingerprint' => $responseArray['meta']['fingerprint']
             ]);
             if (count($responseArray) === 0) {
-                throw new \Exception('Error while getting events by block: ' . print_r($responseArray, true));
+                return null;
             }
             if (!count($responseArray['data'])) {
                 break;
