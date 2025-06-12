@@ -358,11 +358,11 @@ class Api
 
     public static function getDtoByTransactionArray($array): ?ITransactionDTO
     {
-        if (!isset($data['raw_data']['contract'][0]['type'])) {
+        if (!isset($array['raw_data']['contract'][0]['type'])) {
             return null;
         }
 
-        $type = $data['raw_data']['contract'][0]['type'];
+        $type = $array['raw_data']['contract'][0]['type'];
 
         if (!isset(self::$transactionTypeDtoMap[$type])) {
             return null;
