@@ -46,16 +46,10 @@ class UnFreezeBalanceV2TransactionDTO extends AbstractTransactionDTO
         $ownerAddress = $data['raw_data']['contract'][0]['parameter']['value']['owner_address'];
         $resource = $data['raw_data']['contract'][0]['parameter']['value']['resource'] ?? 'BANDWIDTH';
 
-        if (isset($data['block_timestamp'])) {
-            $date = Date::createFromTimestampMs($data['block_timestamp']);
-        } else {
-            $date = Date::createFromTimestampMs($data['raw_data']['timestamp']);
-        }
-
         return new static(
             data: $data,
             txid: $data['txID'],
-            time: $date,
+            time: self::getDateFromArray($data),
             success: $data['ret'][0]['contractRet'] === 'SUCCESS',
             blockNumber: $data['blockNumber'] ?? null,
             ownerAddress: AddressHelper::toBase58($ownerAddress),

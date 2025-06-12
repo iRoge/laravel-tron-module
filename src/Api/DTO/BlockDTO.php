@@ -14,6 +14,7 @@ readonly class BlockDTO
     public function __construct(
         public array  $data,
         public string $blockID,
+        public string $blockNumber,
         public array  $transactions,
     )
     {
@@ -23,6 +24,7 @@ readonly class BlockDTO
     {
         return [
             'blockId' => $this->blockID,
+            'blockNumber' => $this->blockNumber,
             'data' => $this->data,
             'transactions' => $this->transactions,
         ];
@@ -37,6 +39,7 @@ readonly class BlockDTO
         return new static(
             data: $data,
             blockID: $data['blockID'],
+            blockNumber: $data['block_header']['raw_data']['number'],
             transactions: $transactions,
         );
     }
