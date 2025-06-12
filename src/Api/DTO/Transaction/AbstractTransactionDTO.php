@@ -40,7 +40,7 @@ abstract class AbstractTransactionDTO implements ITransactionDTO
     {
         if (
             !isset($data['raw_data']['contract'][0]['parameter']['value']['owner_address'])
-            || (!isset($data['block_timestamp']) && !isset($data['timestamp']))
+            || (!isset($data['block_timestamp']) && !isset($data['raw_data']['timestamp']))
             || !isset($data['txID'])
             || !isset($data['ret'][0]['contractRet'])
             || !isset($data['blockNumber'])
@@ -51,7 +51,7 @@ abstract class AbstractTransactionDTO implements ITransactionDTO
         if (isset($data['block_timestamp'])) {
             $date = Date::createFromTimestampMs($data['block_timestamp']);
         } else {
-            $date = Date::createFromTimestampMs($data['timestamp']);
+            $date = Date::createFromTimestampMs($data['raw_data']['timestamp']);
         }
 
         return new static(
