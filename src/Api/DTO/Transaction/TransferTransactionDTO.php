@@ -44,10 +44,16 @@ class TransferTransactionDTO extends AbstractTransactionDTO
         }
         $value = $data['raw_data']['contract'][0]['parameter']['value']['amount'];
 
+        if (isset($data['block_timestamp'])) {
+            $date = Date::createFromTimestampMs($data['block_timestamp']);
+        } else {
+            $date = Date::createFromTimestampMs($data['timestamp']);
+        }
+
         return new static(
             data: $data,
             txid: $data['txID'],
-            time: isset($data['block_timestamp']) ? Date::createFromTimestampMs($data['block_timestamp']) : null,
+            time: $date,
             success: $data['ret'][0]['contractRet'] === 'SUCCESS',
             blockNumber: $data['blockNumber'] ?? null,
             ownerAddress: AddressHelper::toBase58($data['raw_data']['contract'][0]['parameter']['value']['owner_address']),
