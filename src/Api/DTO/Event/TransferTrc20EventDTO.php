@@ -44,8 +44,8 @@ readonly class TransferTrc20EventDTO extends AbstractEventDTO
             throw new \Exception('Bad transfer event array: ' . print_r($data, true));
         }
 
-        $ownerAddress = AddressHelper::toBase58('41' . substr($data['result']['from'], 2));
-        $receiverAddress = AddressHelper::toBase58('41' . substr($data['result']['to'], 2));
+        $ownerAddress = AddressHelper::toBase58('41' . substr($data['result'][0], 2));
+        $receiverAddress = AddressHelper::toBase58('41' . substr($data['result'][1], 2));
         $value = BigDecimal::of($data['result']['value']);
 
         return new static(
