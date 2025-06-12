@@ -10,6 +10,7 @@ use Iroge\LaravelTronModule\Api\DTO\Transaction\FreezeBalanceV2TransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\TransferTransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\UnDelegateV2ResourcesTransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\UnFreezeBalanceV2TransactionDTO;
+use Iroge\LaravelTronModule\Api\DTO\Transaction\UnknownTransactionDto;
 use Iroge\LaravelTronModule\Api\Enums\Confirmation;
 use Iroge\LaravelTronModule\Api\Enums\Direction;
 use Iroge\LaravelTronModule\Api\Enums\OrderBy;
@@ -157,7 +158,12 @@ class Transactions implements \Iterator
             array_filter(
                 array_map(
                     function (array $data) {
-                        return Api::getDtoByTransactionArray($data);
+                        $transactionDto = Api::getDtoByTransactionArray($data);
+                        if ($transactionDto instanceof UnknownTransactionDto) {
+                            return null;
+                        }
+
+                        return $transactionDto;
                     },
                     $data['data']
                 )

@@ -10,6 +10,7 @@ use Iroge\LaravelTronModule\Api\DTO\Transaction\ITransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\TransferTransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\UnDelegateV2ResourcesTransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\UnFreezeBalanceV2TransactionDTO;
+use Iroge\LaravelTronModule\Api\DTO\Transaction\UnknownTransactionDto;
 use Iroge\LaravelTronModule\Api\Exceptions\BadResponseException;
 use Iroge\LaravelTronModule\Api\Helpers\AmountHelper;
 use Iroge\LaravelTronModule\Models\TronAddress;
@@ -365,7 +366,7 @@ class Api
         $type = $array['raw_data']['contract'][0]['type'];
 
         if (!isset(self::$transactionTypeDtoMap[$type])) {
-            return null;
+            return UnknownTransactionDto::fromArray($array);
         }
 
         return self::$transactionTypeDtoMap[$type]::fromArray($array);
