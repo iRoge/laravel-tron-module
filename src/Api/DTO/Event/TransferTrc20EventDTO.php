@@ -39,14 +39,16 @@ readonly class TransferTrc20EventDTO extends AbstractEventDTO
             || !isset($data['event_name'])
             || $data['event_name'] !== 'Transfer'
             || !isset($data['contract_address'])
-            || !isset($data['result']['value'])
+            || !isset($data['result'][0])
+            || !isset($data['result'][1])
+            || !isset($data['result'][2])
         ) {
             throw new \Exception('Bad transfer event array: ' . print_r($data, true));
         }
 
         $ownerAddress = AddressHelper::toBase58('41' . substr($data['result'][0], 2));
         $receiverAddress = AddressHelper::toBase58('41' . substr($data['result'][1], 2));
-        $value = BigDecimal::of($data['result']['value']);
+        $value = BigDecimal::of($data['result'][2]);
 
         return new static(
             data: $data,
