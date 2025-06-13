@@ -298,7 +298,9 @@ class Api
 
     public function getNowBlock(): BlockDTO
     {
-        $data = $this->manager->request('walletsolidity/getnowblock');
+        $data = $this->manager->request('walletsolidity/getblock', null, [
+            'detail' => true
+        ]);
         if (count($data) === 0) {
             throw new \Exception('Error while getting block: ' . print_r($data, true));
         }
