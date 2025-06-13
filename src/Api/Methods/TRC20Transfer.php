@@ -19,8 +19,8 @@ class TRC20Transfer
         public readonly TRC20Contract $contract,
         public readonly string        $from,
         public readonly string        $to,
-        public readonly BigDecimal       $amount,
-        public readonly BigDecimal       $feeLimit,
+        public readonly BigDecimal    $amount,
+        public readonly BigDecimal    $feeLimit,
     )
     {
     }
@@ -28,8 +28,8 @@ class TRC20Transfer
     public function preview(
         BigDecimal|float|int|string|null $balance = null,
         BigDecimal|float|int|string|null $tokenBalance = null,
-        ?int $bandwidth = null,
-        ?int $energy = null,
+        ?int                             $bandwidth = null,
+        ?int                             $energy = null,
     ): TRC20TransferPreviewDTO
     {
         if ($this->preview !== null) {
@@ -68,12 +68,12 @@ class TRC20Transfer
                 throw new \Exception('From Address is not activated');
             }
 
-            if( $balanceBefore === null ) {
+            if ($balanceBefore === null) {
                 $balanceBefore = $from->balance;
             }
             $balanceAfter = clone $balanceBefore;
 
-            if( $tokenBefore === null ) {
+            if ($tokenBefore === null) {
                 $tokenBefore = $this->contract->balanceOf($this->from);
             }
             $tokenAfter = $tokenBefore->minus($this->amount);
@@ -91,7 +91,7 @@ class TRC20Transfer
 
             $energyDebug = $data;
             $energyRequired = $data['energy_used'];
-            if( $energyBefore === null ) {
+            if ($energyBefore === null) {
                 $energyBefore = $fromResources->energyAvailable;
             }
             if ($energyRequired > $energyBefore) {
@@ -111,8 +111,8 @@ class TRC20Transfer
 
             $bandwidthDebug = $data;
             $bandwidthRequired = strlen($data['transaction']['raw_data_hex']) + 1;
-            if( $bandwidthBefore === null ) {
-                $bandwidthBefore = $fromResources->bandwidthAvailable;
+            if ($bandwidthBefore === null) {
+                $bandwidthBefore = $fromResources->freeBandwidthAvailable + $fromResources->bandwidthAvailable;
             }
             if ($bandwidthRequired > $bandwidthBefore) {
                 $bandwidthInsufficient = $bandwidthRequired;
@@ -124,7 +124,7 @@ class TRC20Transfer
             }
             $transaction = $data['transaction'];
 
-            if( $this->feeLimit->minus($bandwidthFee ?: 0)->minus($energyFee ?: 0)->isNegative() ) {
+            if ($this->feeLimit->minus($bandwidthFee ?: 0)->minus($energyFee ?: 0)->isNegative()) {
                 throw new \Exception('Fees over limit');
             }
 

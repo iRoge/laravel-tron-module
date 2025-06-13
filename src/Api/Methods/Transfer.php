@@ -14,9 +14,9 @@ class Transfer
     protected ?TransferPreviewDTO $preview = null;
 
     public function __construct(
-        protected readonly Api  $api,
-        public readonly string  $from,
-        public readonly string  $to,
+        protected readonly Api     $api,
+        public readonly string     $from,
+        public readonly string     $to,
         public readonly BigDecimal $amount,
     )
     {
@@ -24,10 +24,10 @@ class Transfer
 
     public function preview(
         BigDecimal|float|int|string|null $balance = null,
-        ?int $bandwidth = null
+        ?int                             $bandwidth = null
     ): TransferPreviewDTO
     {
-        if( $this->preview !== null ) {
+        if ($this->preview !== null) {
             return $this->preview;
         }
 
@@ -53,7 +53,7 @@ class Transfer
                 throw new \Exception('From Address is not activated');
             }
 
-            if( $balanceBefore === null ) {
+            if ($balanceBefore === null) {
                 $balanceBefore = $from->balance;
             }
             $balanceAfter = $balanceBefore->minus($this->amount);
@@ -73,15 +73,14 @@ class Transfer
             ]);
 
             $bandwidthRequired = $to->activated ? strlen($transaction['raw_data_hex']) + 1 : 0;
-            if( $bandwidthBefore === null ) {
-                $bandwidthBefore = $fromResources->bandwidthAvailable;
+            if ($bandwidthBefore === null) {
+                $bandwidthBefore = $fromResources->freeBandwidthAvailable + $fromResources->bandwidthAvailable;
             }
-            if( $bandwidthRequired > $bandwidthBefore ) {
+            if ($bandwidthRequired > $bandwidthBefore) {
                 $bandwidthFee = AmountHelper::sunToDecimal(($bandwidthRequired + 1) * 1000);
                 $balanceAfter = $balanceAfter->minus($bandwidthFee);
                 $bandwidthAfter = 0;
-            }
-            else {
+            } else {
                 $bandwidthFee = BigDecimal::of(0);
                 $bandwidthAfter = $bandwidthBefore - $bandwidthRequired;
             }
@@ -110,7 +109,7 @@ class Transfer
     public function send(string $privateKey): TransferSendDTO
     {
         $preview = $this->preview();
-        if( $preview->hasError() ) {
+        if ($preview->hasError()) {
             throw new \Exception($preview->error);
         }
 
