@@ -17,7 +17,7 @@ class TriggerSmartContractDto extends AbstractTransactionDTO
         public bool       $success,
     )
     {
-        parent::__construct($data, $txid, $time, $success);
+        parent::__construct($data, $txid, $time, $success, null, null);
     }
 
     public function toArray(): array
