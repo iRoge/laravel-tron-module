@@ -13,6 +13,7 @@ use Iroge\LaravelTronModule\Api\DTO\IDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\DelegateV2ResourcesTransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\FreezeBalanceV2TransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\TransferTransactionDTO;
+use Iroge\LaravelTronModule\Api\DTO\Transaction\TriggerSmartContractDto;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\UnDelegateV2ResourcesTransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\UnFreezeBalanceV2TransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\UnknownTransactionDto;
@@ -36,6 +37,7 @@ class Api
 
     private static array $transactionTypeDtoMap = [
         'TransferContract' => TransferTransactionDTO::class,
+        'TriggerSmartContract' => TriggerSmartContractDto::class,
         'UnDelegateResourceContract' => UnDelegateV2ResourcesTransactionDTO::class,
         'DelegateResourceContract' => DelegateV2ResourcesTransactionDTO::class,
         'UnFreezeBalanceV2TransactionDTO' => UnFreezeBalanceV2TransactionDTO::class,
