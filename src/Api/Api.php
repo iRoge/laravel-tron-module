@@ -330,18 +330,22 @@ class Api
         $responseArray = $this->manager->request($path, [
             'limit' => $limit
         ]);
-        if (count($responseArray) === 0) {
-            return null;
+        if (!$responseArray) {
+            throw new \Exception('Error while getting events: ' . print_r($responseArray, true));
         }
 
         $events = $responseArray['data'];
-        while (count($events) % $limit === 0) {
+        if (count($events) === 0) {
+            return [];
+        }
+
+        while (isset($responseArray['meta']['fingerprint']) && count($events) % $limit === 0) {
             $responseArray = $this->manager->request($path, [
                 'limit' => $limit,
                 'fingerprint' => $responseArray['meta']['fingerprint']
             ]);
-            if (count($responseArray) === 0) {
-                return null;
+            if (!$responseArray) {
+                break;
             }
             if (!count($responseArray['data'])) {
                 break;
