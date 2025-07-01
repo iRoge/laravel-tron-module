@@ -218,28 +218,28 @@ class AddressTransactionSync extends BaseSync
                     $this->webhooks[] = $deposit;
                 }
 
-                if (!$deposit->block_height) {
-                    try {
-                        $this->log('We request information about block number of TRC-20 transaction ' . $transfer->txid . ' ...');
-                        $blockNumber = $this->api->getTransferBlockNumber($transfer->txid);
-                        $this->log('Information received successfully: ' . $blockNumber);
-
-                        $deposit->update([
-                            'block_height' => $blockNumber ?: null,
-                            'confirmations' => $blockNumber && $blockNumber < $this->node->block_number ? $this->node->block_number - $blockNumber : 0,
-                        ]);
-                        $transaction->update([
-                            'block_number' => $blockNumber ?: null,
-                        ]);
-                        $this->node->increment('requests', 1);
-                    } catch (\Exception $e) {
-                        $this->log('Error: ' . $e->getMessage());
-                    }
-                } else {
-                    $deposit->update([
-                        'confirmations' => $deposit->block_height < $this->node->block_number ? $this->node->block_number - $deposit->block_height : 0,
-                    ]);
-                }
+//                if (!$deposit->block_height) {
+//                    try {
+//                        $this->log('We request information about block number of TRC-20 transaction ' . $transfer->txid . ' ...');
+//                        $blockNumber = $this->api->getTransferBlockNumber($transfer->txid);
+//                        $this->log('Information received successfully: ' . $blockNumber);
+//
+//                        $deposit->update([
+//                            'block_height' => $blockNumber ?: null,
+//                            'confirmations' => $blockNumber && $blockNumber < $this->node->block_number ? $this->node->block_number - $blockNumber : 0,
+//                        ]);
+//                        $transaction->update([
+//                            'block_number' => $blockNumber ?: null,
+//                        ]);
+//                        $this->node->increment('requests', 1);
+//                    } catch (\Exception $e) {
+//                        $this->log('Error: ' . $e->getMessage());
+//                    }
+//                } else {
+//                    $deposit->update([
+//                        'confirmations' => $deposit->block_height < $this->node->block_number ? $this->node->block_number - $deposit->block_height : 0,
+//                    ]);
+//                }
             }
         }
     }
