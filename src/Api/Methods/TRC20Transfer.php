@@ -170,12 +170,7 @@ class TRC20Transfer
             throw new \Exception($preview->error);
         }
 
-        $transaction = $this->api->signTransaction($preview->transaction, $privateKey);
-
-        $data = $this->api->manager->request('wallet/broadcasttransaction', null, $transaction);
-        if (!isset($data['txid'])) {
-            throw new \Exception($response['Error'] ?? print_r($data, true));
-        }
+        $data = $this->api->signAndBroadcastTransaction($preview->transaction, $privateKey);
 
         return new TRC20TransferSendDTO(
             txid: $data['txid'],

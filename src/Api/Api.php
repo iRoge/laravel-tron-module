@@ -117,14 +117,7 @@ class Api
             'resource' => $resource
         ]);
 
-        $signedTransaction = $this->signTransaction($data, $tronAddress->private_key);
-
-        $data = $this->manager->request('wallet/broadcasttransaction', null, $signedTransaction);
-        if (!isset($data['txid'])) {
-            throw new BadResponseException($response['Error'] ?? print_r($data, true));
-        }
-
-        return $data;
+        return $this->signAndBroadcastTransaction($data, $tronAddress->private_key);
     }
 
     public function unfreezeBalanceV2(TronAddress $tronAddress, float $amount, string $resource = 'ENERGY')
@@ -135,14 +128,7 @@ class Api
             'resource' => $resource
         ]);
 
-        $signedTransaction = $this->signTransaction($data, $tronAddress->private_key);
-
-        $data = $this->manager->request('wallet/broadcasttransaction', null, $signedTransaction);
-        if (!isset($data['txid'])) {
-            throw new BadResponseException($response['Error'] ?? print_r($data, true));
-        }
-
-        return $data;
+        return $this->signAndBroadcastTransaction($data, $tronAddress->private_key);
     }
 
     public function delegateResource(TronAddress $tronAddress, string $toAddress, float $amount, string $resource = 'ENERGY')
@@ -154,14 +140,7 @@ class Api
             'resource' => $resource
         ]);
 
-        $signedTransaction = $this->signTransaction($data, $tronAddress->private_key);
-
-        $data = $this->manager->request('wallet/broadcasttransaction', null, $signedTransaction);
-        if (!isset($data['txid'])) {
-            throw new BadResponseException($response['Error'] ?? print_r($data, true));
-        }
-
-        return $data;
+        return $this->signAndBroadcastTransaction($data, $tronAddress->private_key);
     }
 
     public function undelegateResource(TronAddress $tronAddress, string $toAddress, float $amount, string $resource = 'ENERGY')
@@ -173,14 +152,7 @@ class Api
             'resource' => $resource
         ]);
 
-        $signedTransaction = $this->signTransaction($data, $tronAddress->private_key);
-
-        $data = $this->manager->request('wallet/broadcasttransaction', null, $signedTransaction);
-        if (!isset($data['txid'])) {
-            throw new BadResponseException($response['Error'] ?? print_r($data, true));
-        }
-
-        return $data;
+        return $this->signAndBroadcastTransaction($data, $tronAddress->private_key);
     }
 
     public function getDelegatedResourceAccountIndexV2(string $value)
@@ -230,14 +202,7 @@ class Api
             'owner_address' => AddressHelper::toHex($tronAddress->address),
         ]);
 
-        $signedTransaction = $this->signTransaction($data, $tronAddress->private_key);
-
-        $data = $this->manager->request('wallet/broadcasttransaction', null, $signedTransaction);
-        if (!isset($data['txid'])) {
-            throw new BadResponseException($response['Error'] ?? print_r($data, true));
-        }
-
-        return $data;
+        return $this->signAndBroadcastTransaction($data, $tronAddress->private_key);
     }
 
     public function validateAddress(string $address, string &$error = null): bool
@@ -406,6 +371,19 @@ class Api
             amount: $amount,
             feeLimit: $feeLimit,
         );
+    }
+
+    public function signAndBroadcastTransaction(array $data, string $privateKey): array
+    {
+        $signedTransaction = $this->signTransaction($data, $privateKey);
+
+        $data = $this->manager->request('wallet/broadcasttransaction', null, $signedTransaction);
+
+        if (!isset($data['txid'])) {
+            throw new BadResponseException($response['Error'] ?? print_r($data, true));
+        }
+
+        return $data;
     }
 
     public function signTransaction(array $transaction, string $privateKey): array
