@@ -39,11 +39,7 @@ class NodeSync extends BaseSync
     protected function syncBlock(): self
     {
         try {
-            $getBlock = $this->node->api()->manager->request('wallet/getblock');
-            $blockNumber = $getBlock['block_header']['raw_data']['number'] ?? null;
-            if( is_null($blockNumber) ) {
-                throw new \Exception('Current block is unknown!');
-            }
+            $blockDto = $this->node->api()->getNowBlock();
         }
         catch(\Exception $e) {
             $this->node->update([
@@ -55,7 +51,7 @@ class NodeSync extends BaseSync
 
         $this->node->increment('requests');
         $this->node->update([
-            'block_number' => $blockNumber,
+            'block_number' => $blockDto->blockNumber,
             'sync_at' => Date::now(),
             'worked' => true,
         ]);

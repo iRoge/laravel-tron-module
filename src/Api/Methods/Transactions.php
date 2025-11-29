@@ -3,7 +3,6 @@
 namespace Iroge\LaravelTronModule\Api\Methods;
 
 use Iroge\LaravelTronModule\Api\Api;
-use Iroge\LaravelTronModule\Api\ApiManager;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\AbstractTransactionDTO;
 use Iroge\LaravelTronModule\Api\DTO\Transaction\UnknownTransactionDto;
 use Iroge\LaravelTronModule\Api\Enums\Confirmation;
@@ -25,7 +24,7 @@ class Transactions implements \Iterator
     protected bool $hasNext = true;
     protected int $current = 0;
 
-    public function __construct(protected readonly ApiManager $manager, public readonly string $address)
+    public function __construct(protected readonly Api $api, public readonly string $address)
     {
     }
 
@@ -141,10 +140,7 @@ class Transactions implements \Iterator
 
     protected function request(): array
     {
-        $data = $this->manager->request(
-            'v1/accounts/'.$this->address.'/transactions',
-            $this->getQuery()
-        );
+        $data = $this->api->transactions($this->address, $this->getQuery());
 
         $this->fingerprint = $data['meta']['fingerprint'] ?? null;
         $this->hasNext = !!$this->fingerprint;

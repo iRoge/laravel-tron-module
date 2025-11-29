@@ -29,12 +29,8 @@ trait Node
             'available' => true,
         ]);
 
-        $getBlock = $node->api()->manager->request('wallet/getblock');
-        $blockNumber = $getBlock['block_header']['raw_data']['number'] ?? null;
-        if (is_null($blockNumber)) {
-            throw new \Exception('Current block is unknown!');
-        }
-        $node->block_number = $blockNumber;
+        $blockDto = $node->api()->getNowBlock();
+        $node->block_number = $blockDto->blockNumber;
 
         $node->save();
 
@@ -73,12 +69,8 @@ trait Node
             'available' => true,
         ]);
 
-        $getBlock = $node->api()->manager->request('wallet/getblock');
-        $blockNumber = $getBlock['block_header']['raw_data']['number'] ?? null;
-        if (is_null($blockNumber)) {
-            throw new \Exception('Current block is unknown!');
-        }
-        $node->block_number = $blockNumber;
+        $blockDto = $node->api()->getNowBlock();
+        $node->block_number = $blockDto->blockNumber;
 
         $node->save();
 

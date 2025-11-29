@@ -155,6 +155,60 @@ class Api
         return $this->signAndBroadcastTransaction($data, $tronAddress->private_key);
     }
 
+    public function createTransaction($fromAddress, string $toAddress, BigDecimal $amount)
+    {
+        return $this->manager->request('wallet/createtransaction', null, [
+            'owner_address' => AddressHelper::toHex($fromAddress),
+            'to_address' => AddressHelper::toHex($toAddress),
+            'amount' => AmountHelper::decimalToSun($amount),
+        ]);
+    }
+
+    public function triggerSmartContract(
+        $ownerAddress,
+        $contractAddress,
+        $functionSelector,
+        $parameters,
+        $feeLimit,
+        $cellValue
+    )
+    {
+        return $this->manager->request('wallet/triggersmartcontract', null, [
+            'owner_address' => $ownerAddress,
+            'contract_address' => $contractAddress,
+            'function_selector' => $functionSelector,
+            'parameter' => $parameters,
+            'fee_limit' => $feeLimit,
+            'call_value' => $cellValue,
+        ]);
+    }
+
+    public function triggerConstantContract(string $ownerAddress, string $contractAddress, string $functionSelector, string $parameters)
+    {
+        return $this->manager->request('wallet/triggerconstantcontract', null, [
+            'owner_address' => $ownerAddress,
+            'contract_address' => $contractAddress,
+            'function_selector' => $functionSelector,
+            'parameter' => $parameters,
+        ]);
+    }
+
+    public function trc20Transfers(string $address, array $query)
+    {
+        return $this->manager->request(
+            'v1/accounts/' . $address . '/transactions/trc20',
+            $query
+        );
+    }
+
+    public function transactions(string $address, array $query)
+    {
+        return $this->manager->request(
+            'v1/accounts/' . $address . '/transactions',
+            $query
+        );
+    }
+
     public function getDelegatedResourceAccountIndexV2(string $value)
     {
         $data = $this->manager->request('wallet/getdelegatedresourceaccountindexv2', null, [
@@ -229,14 +283,14 @@ class Api
     {
         $address = AddressHelper::toBase58($address);
 
-        return new TRC20Transfers($this->manager, $address);
+        return new TRC20Transfers($this, $address);
     }
 
     public function getTRC20Contract(string $contractAddress): TRC20Contract
     {
         $contractAddress = AddressHelper::toBase58($contractAddress);
 
-        return new TRC20Contract($this->manager, $contractAddress);
+        return new TRC20Contract($this, $contractAddress);
     }
 
     public function getTransactionInfo(string $txid): TransactionInfoDTO

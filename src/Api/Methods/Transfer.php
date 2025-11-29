@@ -66,11 +66,7 @@ class Transfer
                 throw new \Exception('Insufficient balance');
             }
 
-            $transaction = $this->api->manager->request('wallet/createtransaction', null, [
-                'owner_address' => AddressHelper::toHex($this->from),
-                'to_address' => AddressHelper::toHex($this->to),
-                'amount' => AmountHelper::decimalToSun($this->amount),
-            ]);
+            $transaction = $this->api->createTransaction($this->from, $this->to, $this->amount);
 
             $bandwidthRequired = $to->activated ? strlen($transaction['raw_data_hex']) + 1 : 0;
             if ($bandwidthBefore === null) {

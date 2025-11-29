@@ -24,7 +24,7 @@ class TRC20Contract
     protected ?int $decimals = null;
 
     public function __construct(
-        protected readonly ApiManager $manager,
+        protected readonly Api $api,
         public readonly string $address,
     ) {
         $this->abiData = json_decode(file_get_contents(__DIR__.'/Resources/trc20.json'), true);
@@ -131,12 +131,7 @@ class TRC20Contract
         ]);
         $parameters = substr($ethAbi->encodeParameters($abiFunction, $params), 2);
 
-        $data = $this->manager->request('wallet/triggerconstantcontract', null, [
-            'owner_address' => $ownerAddress,
-            'contract_address' => $contractAddress,
-            'function_selector' => $functionSelector,
-            'parameter' => $parameters,
-        ]);
+        $data = $this->api->triggerConstantContract($ownerAddress, $contractAddress, $functionSelector, $parameters);
 
         if (!($data['result'] ?? null)) {
             throw new \Exception(json_encode($data));
@@ -195,14 +190,7 @@ class TRC20Contract
         ]);
         $parameters = substr($ethAbi->encodeParameters($abiFunction, $params), 2);
 
-        $data = $this->manager->request('wallet/triggersmartcontract', null, [
-            'owner_address' => $ownerAddress,
-            'contract_address' => $contractAddress,
-            'function_selector' => $functionSelector,
-            'parameter' => $parameters,
-            'fee_limit' => $feeLimit,
-            'call_value' => $cellValue,
-        ]);
+        $data = $this->api->triggerSmartContract($ownerAddress, $contractAddress, $functionSelector, $parameters, $feeLimit, $cellValue);
 
         if (!($data['result'] ?? null)) {
             throw new \Exception(json_encode($data));

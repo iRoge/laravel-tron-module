@@ -2,7 +2,7 @@
 
 namespace Iroge\LaravelTronModule\Api\Methods;
 
-use Iroge\LaravelTronModule\Api\ApiManager;
+use Iroge\LaravelTronModule\Api\Api;
 use Iroge\LaravelTronModule\Api\DTO\TRC20TransferDTO;
 use Iroge\LaravelTronModule\Api\Enums\Confirmation;
 use Iroge\LaravelTronModule\Api\Enums\OrderBy;
@@ -21,7 +21,7 @@ class TRC20Transfers implements \Iterator
     protected int $current = 0;
 
     public function __construct(
-        protected readonly ApiManager $manager,
+        protected readonly Api $api,
         public readonly string $address,
     ) {
     }
@@ -135,10 +135,7 @@ class TRC20Transfers implements \Iterator
 
     protected function request(): array
     {
-        $data = $this->manager->request(
-            'v1/accounts/'.$this->address.'/transactions/trc20',
-            $this->getQuery()
-        );
+        $data = $this->api->trc20Transfers($this->address, $this->getQuery());
 
         $this->fingerprint = $data['meta']['fingerprint'] ?? null;
         $this->hasNext = !!$this->fingerprint;
