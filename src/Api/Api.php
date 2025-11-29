@@ -276,7 +276,7 @@ class Api
     {
         $address = AddressHelper::toBase58($address);
 
-        return new Transactions($this->manager, $address);
+        return new Transactions($this, $address);
     }
 
     public function getTRC20Transfers(string $address): TRC20Transfers
