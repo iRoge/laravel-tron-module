@@ -33,9 +33,12 @@ readonly class BlockDTO
     public static function fromArray(array $data): ?static
     {
         $transactions = [];
-        foreach ($data['transactions'] as $transactionArray) {
-            $transactions[] = Api::getDtoByTransactionArray($transactionArray);
+        if (isset($data['transactions'])) {
+            foreach ($data['transactions'] as $transactionArray) {
+                $transactions[] = Api::getDtoByTransactionArray($transactionArray);
+            }
         }
+
         return new static(
             data: $data,
             blockID: $data['blockID'],
