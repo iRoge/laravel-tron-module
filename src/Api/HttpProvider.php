@@ -44,6 +44,11 @@ class HttpProvider
 
     public function request(string $path, array $payload = [], HttpMethod $method = HttpMethod::GET): array
     {
+        $headers = $this->headers;
+        if (is_array($this->headers) && array_is_list($this->headers)) {
+            $randomKey = array_rand($this->headers);
+            $headers = $this->headers[$randomKey];
+        }
         $client = Http::asJson()
             ->acceptJson()
             ->withOptions([
@@ -52,7 +57,7 @@ class HttpProvider
                 'auth' => $this->user && [$this->user, $this->password],
                 'proxy' => $this->formatProxy($this->proxy),
             ])
-            ->withHeaders($this->headers);
+            ->withHeaders($headers);
 
         $response = $method === HttpMethod::POST ? $client->post($path, $payload) : $client->get($path);
         $statusCode = $response->status();
