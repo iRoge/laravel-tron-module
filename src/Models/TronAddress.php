@@ -14,6 +14,7 @@ class TronAddress extends Model
     protected $fillable = [
         'wallet_id',
         'address',
+        'hex_address',
         'title',
         'watch_only',
         'private_key',
