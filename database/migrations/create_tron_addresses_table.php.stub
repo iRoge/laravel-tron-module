@@ -14,6 +14,7 @@ return new class extends Migration {
                 ->constrained('tron_wallets')
                 ->cascadeOnDelete();
             $table->string('address');
+            $table->string('hex_address');
             $table->string('title')
                 ->nullable();
             $table->boolean('watch_only')

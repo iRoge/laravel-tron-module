@@ -41,13 +41,15 @@ trait Address
             ->deriveChild($index);
         $privateKey = (string)$hdKey->privateKey;
 
-        $addressString = AddressHelper::toBase58('41'.Key::privateKeyToAddress($privateKey));
+        $hexAddress = '41' . Key::privateKeyToAddress($privateKey);
+        $addressString = AddressHelper::toBase58($hexAddress);
 
         /** @var class-string<TronAddress> $addressModel */
         $addressModel = Tron::getModel(TronModel::Address);
 
         $address = new $addressModel([
             'address' => $addressString,
+            'hex_address' => $hexAddress,
             'title' => $title,
             'index' => $index,
         ]);
@@ -61,6 +63,7 @@ trait Address
     {
         return $wallet->addresses()->create([
             'address' => $address,
+            'hex_address' => AddressHelper::toHex($address),
             'watch_only' => true,
         ]);
     }
