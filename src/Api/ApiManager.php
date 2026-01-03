@@ -106,7 +106,7 @@ class ApiManager
         $split = explode('/', $path);
         if (in_array($split[0], ['walletsolidity', 'walletextension'])) {
             $provider = $this->solidityNode();
-        } elseif (in_array($split[0], ['event'])) {
+        } elseif (in_array($split[0], ['event', 'v1'])) {
             $provider = $this->eventServer();
         } elseif (in_array($split[0], ['trx-sign'])) {
             $provider = $this->signServer();
