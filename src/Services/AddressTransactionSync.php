@@ -129,6 +129,8 @@ class AddressTransactionSync extends BaseSync
                 'debug_data' => $transaction->toArray(),
             ]);
 
+            $this->log('Transaction created: ' . $tronTransaction->txid);
+
             if ($transaction->receiverAddress === $this->address->address && $transaction instanceof TransferTransactionDTO) {
                 $deposit = $this->address
                     ->deposits()
@@ -143,10 +145,13 @@ class AddressTransactionSync extends BaseSync
                     ]);
 
                 if ($deposit->wasRecentlyCreated) {
+                    $this->log('Deposit created: ' . $transaction->txid);
                     $deposit->setRelation('wallet', $this->wallet);
                     $deposit->setRelation('address', $this->address);
 
                     $this->webhooks[] = $deposit;
+                } else {
+                    $this->log('Deposit already existed: ' . $transaction->txid);
                 }
             }
 
@@ -196,6 +201,8 @@ class AddressTransactionSync extends BaseSync
             'debug_data' => $transfer->toArray(),
         ]);
 
+        $this->log('Transaction created: ' . $transfer->txid);
+
         if ($transfer->to === $this->address->address) {
             $trc20 = TronTRC20::whereAddress($transfer->contractAddress)->first();
             if ($trc20) {
@@ -210,12 +217,17 @@ class AddressTransactionSync extends BaseSync
                         'time_at' => $transfer->time ?? Date::now(),
                     ]);
 
+
+
                 if ($deposit->wasRecentlyCreated) {
+                    $this->log('Deposit created: ' . $transfer->txid);
                     $deposit->setRelation('wallet', $this->wallet);
                     $deposit->setRelation('address', $this->address);
                     $deposit->setRelation('trc20', $trc20);
 
                     $this->webhooks[] = $deposit;
+                } else {
+                    $this->log('Deposit already existed: ' . $transfer->txid);
                 }
 
 //                if (!$deposit->block_height) {
@@ -248,7 +260,7 @@ class AddressTransactionSync extends BaseSync
     {
         if ($this->webhookHandler) {
             foreach ($this->webhooks as $item) {
-                $this->log('Call Webhook Handler for Deposit #' . $item->id . ': ' . print_r($item->toArray(), true));
+                $this->log('Call Webhook Handler for Deposit #' . $item->txid);
 
                 $this->webhookHandler->handle($item);
             }
