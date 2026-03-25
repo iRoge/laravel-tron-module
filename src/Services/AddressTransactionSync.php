@@ -54,32 +54,38 @@ class AddressTransactionSync extends BaseSync
         parent::run();
 
         if (!$this->address->available) {
-            $this->log('No synchronization required, the address has not been available!');
+            $this->log('Обновить адрес не получилось. Он еще не доступен (available=0)');
             return;
         }
 
-        $this->transactions()
-            ->runWebhooks();
+        try {
+            $this->log('Обновление транзакций с отправкой вебхуков...');
+
+            DB::transaction(function () {
+                $this->transactions()
+                    ->runWebhooks();
+            });
+        } catch (\Throwable $exception) {
+            $this->log('Ошибка: ' . $exception->getMessage());
+            throw $exception;
+        }
+
     }
 
     protected function transactions(): self
     {
         $minTimestamp = max(($this->address->sync_at?->getTimestamp() ?? 0) - 3600, 0) * 1000;
 
-        $this->log('Method v1/accounts/' . $this->address->address . '/transactions started...');
         $transactions = $this->api
             ->getTransactions($this->address->address)
-            ->limit(200)
+            ->limit(100)
             ->searchInterval(false)
             ->minTimestamp($minTimestamp);
-        $this->log('Method v1/accounts/' . $this->address->address . '/transactions finished');
 
-        $this->log('Method v1/accounts/' . $this->address->address . '/transactions/trc20 started...');
         $trc20Transfers = $this->api
             ->getTRC20Transfers($this->address->address)
-            ->limit(200)
+            ->limit(100)
             ->minTimestamp($minTimestamp);
-        $this->log('Method v1/accounts/' . $this->address->address . '/transactions/trc20 finished');
 
         $this->node->increment('requests', 2);
 
@@ -116,69 +122,68 @@ class AddressTransactionSync extends BaseSync
             return;
         }
 
-        DB::transaction(function () use ($type, $transaction) {
-            $tronTransaction = TronTransaction::updateOrCreate([
-                'txid' => $transaction->txid,
-            ], [
-                'type' => $type,
-                'time_at' => $transaction->time,
-                'from' => $transaction->ownerAddress,
-                'to' => $transaction->receiverAddress,
-                'amount' => $transaction->amount,
-                'block_number' => $transaction->blockNumber,
-                'debug_data' => $transaction->toArray(),
-            ]);
 
-            $this->log('Transaction created: ' . $tronTransaction->txid);
+        $tronTransaction = TronTransaction::updateOrCreate([
+            'txid' => $transaction->txid,
+        ], [
+            'type' => $type,
+            'time_at' => $transaction->time,
+            'from' => $transaction->ownerAddress,
+            'to' => $transaction->receiverAddress,
+            'amount' => $transaction->amount,
+            'block_number' => $transaction->blockNumber,
+            'debug_data' => $transaction->toArray(),
+        ]);
 
-            if ($transaction->receiverAddress === $this->address->address && $transaction instanceof TransferTransactionDTO) {
-                $deposit = $this->address
-                    ->deposits()
-                    ->updateOrCreate([
-                        'txid' => $transaction->txid,
-                    ], [
-                        'wallet_id' => $this->address->wallet_id,
-                        'amount' => $transaction->amount,
-                        'block_height' => $transaction->blockNumber ?? 0,
-                        'confirmations' => $transaction->blockNumber && $transaction->blockNumber < $this->node->block_number ? $this->node->block_number - $transaction->blockNumber : 0,
-                        'time_at' => $transaction->time ?? Date::now(),
-                    ]);
+        $this->log('Создана транзакция: ' . $tronTransaction->txid);
 
-                if ($deposit->wasRecentlyCreated) {
-                    $this->log('Deposit created: ' . $transaction->txid);
-                    $deposit->setRelation('wallet', $this->wallet);
-                    $deposit->setRelation('address', $this->address);
+        if ($transaction->receiverAddress === $this->address->address && $transaction instanceof TransferTransactionDTO) {
+            $deposit = $this->address
+                ->deposits()
+                ->updateOrCreate([
+                    'txid' => $transaction->txid,
+                ], [
+                    'wallet_id' => $this->address->wallet_id,
+                    'amount' => $transaction->amount,
+                    'block_height' => $transaction->blockNumber ?? 0,
+                    'confirmations' => $transaction->blockNumber && $transaction->blockNumber < $this->node->block_number ? $this->node->block_number - $transaction->blockNumber : 0,
+                    'time_at' => $transaction->time ?? Date::now(),
+                ]);
 
-                    $this->webhooks[] = $deposit;
-                } else {
-                    $this->log('Deposit already existed: ' . $transaction->txid);
-                }
+            if ($deposit->wasRecentlyCreated) {
+                $this->log('Получен депозит: ' . $transaction->txid);
+                $deposit->setRelation('wallet', $this->wallet);
+                $deposit->setRelation('address', $this->address);
+
+                $this->webhooks[] = $deposit;
+            } else {
+                $this->log('Депозит уже записан в базу: ' . $transaction->txid);
             }
+        }
 
-            if ($tronTransaction->wasRecentlyCreated) {
-                if (
-                    $transaction instanceof DelegateV2ResourcesTransactionDTO
-                    || $transaction instanceof UnDelegateV2ResourcesTransactionDTO
-                ) {
-                    $tronDelegate = TronDelegate::query()
-                        ->createOrFirst(
-                            [
-                                'owner_address' => $transaction->ownerAddress,
-                                'receiver_address' => $transaction->receiverAddress,
-                                'resource' => $transaction->resource,
-                            ],
-                            [
-                                'amount' => 0
-                            ]
-                        );
+        if ($tronTransaction->wasRecentlyCreated) {
+            if (
+                $transaction instanceof DelegateV2ResourcesTransactionDTO
+                || $transaction instanceof UnDelegateV2ResourcesTransactionDTO
+            ) {
+                $tronDelegate = TronDelegate::query()
+                    ->createOrFirst(
+                        [
+                            'owner_address' => $transaction->ownerAddress,
+                            'receiver_address' => $transaction->receiverAddress,
+                            'resource' => $transaction->resource,
+                        ],
+                        [
+                            'amount' => 0
+                        ]
+                    );
 
-                    $transactionAmount = (float)$transaction->amount->__toString();
-                    $amount = $tronDelegate->amount + ($transaction instanceof DelegateV2ResourcesTransactionDTO ? $transactionAmount : -$transactionAmount);
-                    $tronDelegate->amount = $amount;
-                    $tronDelegate->save();
-                }
+                $transactionAmount = (float)$transaction->amount->__toString();
+                $amount = $tronDelegate->amount + ($transaction instanceof DelegateV2ResourcesTransactionDTO ? $transactionAmount : -$transactionAmount);
+                $tronDelegate->amount = $amount;
+                $tronDelegate->save();
             }
-        });
+        }
     }
 
     protected function handlerTRC20Transfer(TRC20TransferDTO $transfer): void
@@ -201,7 +206,7 @@ class AddressTransactionSync extends BaseSync
             'debug_data' => $transfer->toArray(),
         ]);
 
-        $this->log('Transaction created: ' . $transfer->txid);
+        $this->log('Создана транзакция: ' . $transfer->txid);
 
         if ($transfer->to === $this->address->address) {
             $trc20 = TronTRC20::whereAddress($transfer->contractAddress)->first();
@@ -218,40 +223,16 @@ class AddressTransactionSync extends BaseSync
                     ]);
 
 
-
                 if ($deposit->wasRecentlyCreated) {
-                    $this->log('Deposit created: ' . $transfer->txid);
+                    $this->log('Получен депозит: ' . $transfer->txid);
                     $deposit->setRelation('wallet', $this->wallet);
                     $deposit->setRelation('address', $this->address);
                     $deposit->setRelation('trc20', $trc20);
 
                     $this->webhooks[] = $deposit;
                 } else {
-                    $this->log('Deposit already existed: ' . $transfer->txid);
+                    $this->log('Депозит уже записан в базу: ' . $transfer->txid);
                 }
-
-//                if (!$deposit->block_height) {
-//                    try {
-//                        $this->log('We request information about block number of TRC-20 transaction ' . $transfer->txid . ' ...');
-//                        $blockNumber = $this->api->getTransferBlockNumber($transfer->txid);
-//                        $this->log('Information received successfully: ' . $blockNumber);
-//
-//                        $deposit->update([
-//                            'block_height' => $blockNumber ?: null,
-//                            'confirmations' => $blockNumber && $blockNumber < $this->node->block_number ? $this->node->block_number - $blockNumber : 0,
-//                        ]);
-//                        $transaction->update([
-//                            'block_number' => $blockNumber ?: null,
-//                        ]);
-//                        $this->node->increment('requests', 1);
-//                    } catch (\Exception $e) {
-//                        $this->log('Error: ' . $e->getMessage());
-//                    }
-//                } else {
-//                    $deposit->update([
-//                        'confirmations' => $deposit->block_height < $this->node->block_number ? $this->node->block_number - $deposit->block_height : 0,
-//                    ]);
-//                }
             }
         }
     }

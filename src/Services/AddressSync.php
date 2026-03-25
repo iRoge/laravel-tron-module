@@ -47,24 +47,26 @@ class AddressSync extends BaseSync
         parent::run();
 
         if (!$this->address->available) {
-            $this->log('No synchronization required, the address has not been available!');
+            $this->log('Обновить адрес не получилось. Он еще не доступен (available=0)');
             return;
         }
 
-        $this
-            ->accountWithResources()
-            ->trc20Balances();
+        try {
+            $this->log('Обновление общей информации и балансов...');
+            $this
+                ->accountWithResources()
+                ->trc20Balances();
+        } catch (\Throwable $exception) {
+            $this->log('Ошибка: ' . $exception->getMessage());
+            throw $exception;
+        }
     }
 
     protected function accountWithResources(): self
     {
-        $this->log('Method walletsolidity/getaccount started...');
         $getAccount = $this->api->getAccount($this->address->address);
-        $this->log('Method walletsolidity/getaccount finished: ' . print_r($getAccount->toArray(), true));
 
-        $this->log('Method wallet/getaccountresource started...');
         $getAccountResources = $this->api->getAccountResources($this->address->address);
-        $this->log('Method wallet/getaccountresource finished: ' . print_r($getAccountResources->toArray(), true));
 
         $this->address->update([
             'activated' => $getAccount->activated,
@@ -83,9 +85,7 @@ class AddressSync extends BaseSync
         $balances = [];
 
         foreach ($this->trc20Addresses as $trc20Address) {
-            $this->log('Get TRC20 Balance from contract *' . $trc20Address . '* started...');
             $balance = Tron::getTRC20Balance($this->address, $trc20Address);
-            $this->log('Get TRC20 Balance from contract *' . $trc20Address . '* finished: ' . $balance->__toString());
 
             $balances[$trc20Address] = $balance->__toString();
         }
