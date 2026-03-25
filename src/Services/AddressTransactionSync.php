@@ -62,9 +62,10 @@ class AddressTransactionSync extends BaseSync
             $this->log('Обновление транзакций с отправкой вебхуков...');
 
             DB::transaction(function () {
-                $this->transactions()
-                    ->runWebhooks();
+                $this->transactions();
             });
+            
+            $this->runWebhooks();
         } catch (\Throwable $exception) {
             $this->log('Ошибка: ' . $exception->getMessage());
             throw $exception;
